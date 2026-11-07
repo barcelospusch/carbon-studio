@@ -1,11 +1,13 @@
 import {icon} from './icons';
+import logo from '../logo.png';
 import type {DocumentState} from './api';
-export function installStartScreen(actions:{open:()=>void;template:()=>void;select:(name:string)=>void;refresh:()=>void}){
+export function installStartScreen(actions:{open:()=>void;template:()=>void;cv:()=>void;select:(name:string)=>void;refresh:()=>void}){
  const host=document.createElement('section');host.id='start-screen';host.className='start-screen';
- host.innerHTML=`<img class="start-logo" src="./logo.png" alt="Carbon Studio"/><h1 id="start-title">Seu próximo documento começa aqui.</h1><p id="start-description">Selecione uma pasta para começar ou comece do template.</p><div id="start-path" class="start-path hidden"></div><div id="document-picker" class="document-picker"></div><div class="start-actions"><button id="start-open" class="primary">${icon('folder')}Selecionar pasta</button><button id="start-template">${icon('template')}Começar do template</button><button id="refresh-project" class="hidden">${icon('refresh')}Atualizar lista</button></div>`;
+ host.innerHTML=`<img class="start-logo" src="${logo}" alt="Carbon Studio"/><h1 id="start-title">Seu próximo documento começa aqui.</h1><p id="start-description">Selecione uma pasta para começar ou comece do template.</p><div id="start-path" class="start-path hidden"></div><div id="document-picker" class="document-picker"></div><div class="start-actions"><button id="start-open" class="primary">${icon('folder')}Selecionar pasta</button><button id="start-template">${icon('template')}Começar do template</button><button id="start-cv">Currículo</button><button id="refresh-project" class="hidden">${icon('refresh')}Atualizar lista</button></div>`;
  document.querySelector('.workspace')!.prepend(host);
  host.querySelector<HTMLButtonElement>('#start-open')!.onclick=actions.open;
  host.querySelector<HTMLButtonElement>('#start-template')!.onclick=actions.template;
+ host.querySelector<HTMLButtonElement>('#start-cv')!.onclick=actions.cv;
  host.querySelector<HTMLButtonElement>('#refresh-project')!.onclick=actions.refresh;
  return (document:DocumentState)=>{
   const active=document.active!==false;host.classList.toggle('hidden',active);host.parentElement!.classList.toggle('show-start',!active);

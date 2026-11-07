@@ -14,7 +14,11 @@ async function scanProject(folder){
    if(++visited>10000)throw new Error('A pasta contém mais de 10.000 itens. Selecione uma pasta de documentos mais específica.');
    const file=path.join(directory,entry.name),name=path.relative(root,file).replaceAll('\\','/');
    if(entry.isDirectory()){entries.push({name,kind:'folder'});await walk(file,depth+1);}
-   else if(/\.(cb|mmd|png|jpe?g|pdf)$/i.test(entry.name)){const kind=path.extname(entry.name).slice(1).toLowerCase();entries.push({name,kind});if(kind==='cb')documents.push(name);}
+   else if(entry.isFile()){
+    const kind=path.extname(entry.name).slice(1).toLowerCase()||'file';
+    entries.push({name,kind});
+    if(kind==='cb')documents.push(name);
+   }
   }
  }
  await walk(root,0);return {root,entries,documents};

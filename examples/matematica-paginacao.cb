@@ -1,0 +1,50 @@
+@title Matemática e paginação
+@header[all][left] Notas de pesquisa
+@header[first][left] Apresentação
+@header[even][right] Verso
+@header[2][left] Demonstração
+@footer[all][right] Página {page} de {pages}
+
+# Matrizes
+A matriz identidade inline é $I = @matrix[parentheses]{1, 0; 0, 1}$.
+
+@matrix[brackets][
+1, 2
+3, \frac{1}{2}
+]
+
+@equation[align=equals label=eq:energia number=1][
+E = mc^2
+m = \frac{E}{c^2}
+]
+
+A expressão @eqref(eq:energia) pode ser citada no texto.
+
+- [ ] Revisar a demonstração.
+- [X] Escrever a primeira versão.
+
+@newpage
+
+# Diagrama
+
+@caption Fluxo de trabalho. {#fig:fluxo pos=[here]}
+```mermaid
+flowchart LR
+  A[Escrever] --> B[Compilar]
+  B --> C[Exportar]
+```
+
+@equation[align=left][
+a = 1
+bbb = 2
+]
+
+@equation[align=right][
+a = 1
+bbb = 2
+]
+
+@equation[align=center][
+a = 1
+bbb = 2
+]

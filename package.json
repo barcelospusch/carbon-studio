@@ -1,6 +1,6 @@
 {
   "name": "carbon-studio",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "private": true,
   "description": "Editor Carbon para Windows: Carbon → LaTeX → PDF",
   "author": "Carbon Studio",
@@ -14,8 +14,8 @@
     "typecheck": "tsc --noEmit",
     "build": "npm run typecheck && vite build",
     "start": "electron .",
-    "test": "node --test tests/core.test.cjs tests/carbon.test.cjs tests/layout.test.cjs tests/alignment.test.cjs tests/workspace.test.cjs",
-    "test:e2e": "node --test --test-concurrency=1 tests/e2e.test.cjs tests/layout-e2e.test.cjs tests/alignment-e2e.test.cjs",
+    "test": "node --test tests/core.test.cjs tests/carbon.test.cjs tests/layout.test.cjs tests/alignment.test.cjs tests/workspace.test.cjs tests/features.test.cjs",
+    "test:e2e": "node --test --test-concurrency=1 tests/e2e.test.cjs tests/layout-e2e.test.cjs tests/alignment-e2e.test.cjs tests/features-e2e.test.cjs",
     "prepare:compiler": "node scripts/prepare-compiler.cjs",
     "dist:win": "node scripts/build-win.cjs",
     "pack:win": "node scripts/build-win.cjs --dir",
@@ -26,11 +26,12 @@
   "devDependencies": {
     "electron": "45.2.1",
     "electron-builder": "26.18.0",
+    "mermaid": "12.2.0",
+    "monaco-editor": "0.57.0",
+    "pdfjs-dist": "6.5.438",
     "playwright": "1.64.1",
     "typescript": "7.0.2",
-    "vite": "8.3.5",
-    "monaco-editor": "0.57.0",
-    "pdfjs-dist": "6.5.438"
+    "vite": "8.3.5"
   },
   "build": {
     "appId": "org.carbonlang.studio",
@@ -78,6 +79,14 @@
       {
         "from": "assets/themes",
         "to": "themes"
+      },
+      {
+        "from": "node_modules/mermaid/LICENSE",
+        "to": "licenses/mermaid-LICENSE.txt"
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.md"
       }
     ],
     "asar": true,

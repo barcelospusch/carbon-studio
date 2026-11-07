@@ -26,7 +26,9 @@ A prévia e o arquivo exportado usam o mesmo PDF gerado pelo motor LaTeX.
 - Metadados, sumário, títulos, listas, tabelas, figuras e matemática LaTeX.
 - Controle de margens, papel, orientação, tipografia e quebras de página.
 - Alinhamento de parágrafos, colunas e células.
-- Diagramas Mermaid opcionais, importações e referências bibliográficas.
+- Diagramas Mermaid integrados, importações e referências bibliográficas.
+- Currículos, barra de formatação, estrutura de títulos e controles de arquivos.
+- Cabeçalhos e rodapés por página, tarefas, matrizes e equações numeradas.
 - Sete temas locais: Dark+, Light+, Monokai, Dracula, Solarized Dark, GitHub Dark e Carbon Original.
 - Autor e instituição padrão, recuperação de alterações e detecção de mudanças externas nos arquivos.
 - Ícones SVG personalizados na interface e nos controles de busca e recolhimento do editor.
@@ -37,8 +39,8 @@ Baixe um executável na página de [Releases](https://github.com/barcelospusch/c
 
 | Arquivo | Utilização |
 | --- | --- |
-| `Carbon-Studio-0.2.0-x64-Setup.exe` | Instalador com atalhos e associação de arquivos `.cb`. |
-| `Carbon-Studio-0.2.0-x64-Portable.exe` | Versão portátil. |
+| `Carbon-Studio-0.3.1-x64-Setup.exe` | Instalador com atalhos e associação de arquivos `.cb`. |
+| `Carbon-Studio-0.3.1-x64-Portable.exe` | Versão portátil. |
 
 O aplicativo é distribuído para **Windows 10/11 x64**. O motor PDF acompanha a distribuição; a primeira compilação pode precisar de internet para preparar fontes e pacotes TeX. Não é necessário instalar Rust nem uma distribuição completa de LaTeX.
 
@@ -85,6 +87,10 @@ Consulte [LANGUAGE.md](LANGUAGE.md) para a sintaxe completa. Exemplos prontos:
 - [Relatório com bibliografia](examples/relatorio.cb)
 - [Layout e tipografia](examples/layout.cb)
 - [Alinhamento de texto e tabelas](examples/alinhamento.cb)
+- [Currículo](examples/curriculo.cb)
+- [Matemática, paginação e Mermaid](examples/matematica-paginacao.cb)
+
+A [Wiki](wiki/Home.md) organiza as instruções de uso. Veja também a [descrição do repositório](DESCRICAO_REPOSITORIO.md) e as [notas da versão](RELEASE_0.3.1.md).
 
 ## Desenvolver localmente
 
@@ -166,13 +172,7 @@ Tema, papel padrão, autor e instituição são salvos no dispositivo. A autoria
 
 ## Diagramas Mermaid
 
-Para documentos com diagramas, instale o Mermaid CLI na pasta do projeto Carbon:
-
-```cmd
-npm install --prefix tools\mermaid @mermaid-js/mermaid-cli
-```
-
-O Studio detecta a instalação em `tools/mermaid/node_modules/@mermaid-js/mermaid-cli/src/cli.js` na pasta do projeto ou do aplicativo. O Node precisa estar no PATH. Mermaid CLI e seu navegador Chromium são opcionais e não acompanham o instalador.
+Escreva um bloco Mermaid no documento ou importe uma biblioteca .mmd. O Studio renderiza o diagrama localmente com o Chromium já incluído no Electron. Consulte a [Wiki](wiki/Home.md) para os exemplos.
 
 ## Estrutura do projeto
 
@@ -182,7 +182,7 @@ O Studio detecta a instalação em `tools/mermaid/node_modules/@mermaid-js/merma
 | `electron/` | Compilador Carbon, arquivos, projetos, preferências e IPC. |
 | `assets/icons/` | SVGs personalizados e inventário de ícones. |
 | `assets/themes/` | Definições iniciais dos temas. |
-| `public/` | Arquivos estáticos da interface. |
+| `logo.png` | Logotipo da interface e fonte dos ícones Windows. |
 | `examples/` | Documentos de exemplo e recursos utilizados por eles. |
 | `scripts/` | Preparação do motor PDF, ícone e build Windows. |
 | `tests/` | Testes do compilador, arquivos, preferências e interface. |

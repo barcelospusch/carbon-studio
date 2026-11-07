@@ -5,7 +5,7 @@ import type {DocumentLayout,Result} from './api';
 export function installLayoutPanel(editor:MonacoEditor.IStandaloneCodeEditor,toast:(message:string)=>void){
   const api=window.carbonStudio;
   const unwrap=<T>(result:Result<T>):T=>{if(!result.ok)throw new Error(result.error);return result.data;};
-  const sidebar=document.querySelector('.sidebar-section')!;
+  const sidebar=document.querySelector('#format-tools')!;
   sidebar.insertAdjacentHTML('beforeend',`<button id="document-layout">${icon('layout')} <span>Layout do documento</span></button><button id="insert-page-break">${icon('pageBreak')} <span>Quebra de página</span></button><button id="element-position">${icon('position')} <span>Posicionar figura / tabela</span></button>`);
   document.body.insertAdjacentHTML('beforeend',`
   <dialog id="layout-dialog"><form id="layout-form">

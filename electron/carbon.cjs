@@ -6,10 +6,13 @@ const {runCompiler} = require('./core.cjs');
 const {extractLayout,placement} = require('./layout.cjs');
 const {fontPreamble} = require('./fonts.cjs');
 const {alignment,COMMANDS,alignedCell,parseTable} = require('./alignment.cjs');
+const {matrix,expandMatrices,equation} = require('./science.cjs');
+const {pageStyle} = require('./page-style.cjs');
+const {cvHeader,cvEntry} = require('./cv.cjs');
 const escape = text => String(text).replace(/[\\{}%&#_$~^]/g, c => ({'\\':'\\textbackslash{}','{':'\\{','}':'\\}','%':'\\%','&':'\\&','#':'\\#','_':'\\_','$':'\\$','~':'\\textasciitilde{}','^':'\\textasciicircum{}'}[c]));
 function math(text) {
   if (/\\(?:input|include|openout|openin|write|read|catcode|csname|def|newcommand|usepackage|special|directlua|immediate|endlinechar|scantokens|loop)\b/.test(text)) throw new Error('Comando não permitido em matemática (unsupported math command).');
-  return text.trim().replace(/\n\s*\n/g,'\n');
+  return expandMatrices(text.trim().replace(/\n\s*\n/g,'\n'));
 }
 function attributes(text='',fallback={}) {
   const width=text.match(/width=(\d+(?:\.\d+)?)%/)?.[1];
@@ -19,7 +22,7 @@ function inline(text, context, slots=[]) {
   const hold=value=>`\u0000${slots.push(value)-1}\u0000`;
   text=text.replace(/\$([^$\n]+)\$/g,(_,value)=>hold(`$${math(value)}$`));
   text=text.replace(/\\\|/g,'|');
-  text=text.replace(/@(ref|autoref|pageref)\(([\w:.-]+)\)/g,(_,kind,id)=>hold(`\\${kind}{${id}}`));
+  text=text.replace(/@(ref|autoref|pageref|eqref)\(([\w:.-]+)\)/g,(_,kind,id)=>hold(`\\${kind}{${id}}`));
   text=text.replace(/@cite\(([\w:., -]+)\)/g,(_,keys)=>hold(context.cite(keys)));
   text=text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,(_,label,url)=>hold(`\\href{${escape(url)}}{${inline(label,context)}}`));
   text=text.replace(/\*\*(.+?)\*\*|__(.+?)__/g,(_,a,b)=>hold(`\\textbf{${inline(a||b,context,slots)}}`)).replace(/\*([^*]+)\*|_([^_]+)_/g,(_,a,b)=>hold(`\\textit{${inline(a||b,context,slots)}}`)).replace(/~~(.+?)~~/g,(_,value)=>hold(`\\sout{${inline(value,context,slots)}}`));
@@ -49,7 +52,7 @@ async function expand(source,base,context,stack=[]) {
   }
   return result;
 }
-async function transpile(source,{base,directory,paper='a4',mermaid='',node='',signal,timeout=180000,onLog=()=>{}}) {
+async function transpile(source,{base,directory,paper='a4',mermaid='',node='',renderMermaid,signal,timeout=180000,onLog=()=>{}}) {
   const entries=new Map(),diagrams=new Map(),cited=[];
   const style=source.match(/@print_bibliography\[style=(\w+)\]/)?.[1]||'abnt';
   if(!['abnt','ieee','apa','mla','vancouver','chicago'].includes(style)) throw new Error(`Estilo bibliográfico desconhecido: ${style}`);
@@ -76,6 +79,8 @@ async function transpile(source,{base,directory,paper='a4',mermaid='',node='',si
     entries.set(entry[1],fields);
   }
   let title='',date='',type='article',authors=[],body=[],caption='',captionAttrs={},figure=0;
+  let headline='';
+  const contacts=[], pageRules=[];
   const lists=[];
   const alignments=[];
   const closeLists=(depth=0)=>{while(lists.length>depth)body.push(`\\end{${lists.pop().environment}}`);};
@@ -86,6 +91,13 @@ async function transpile(source,{base,directory,paper='a4',mermaid='',node='',si
     await fs.copyFile(absolute,path.join(directory,target)).catch(()=>{throw new Error(`Figura não encontrada: ${absolute}`);});return target;
   }
   async function diagram(code,attrs) {
+    if(renderMermaid){
+      const output='diagram-'+(++figure)+'.png';
+      await renderMermaid(code,path.join(directory,output),{signal,timeout});
+      const rendered=image(output,attrs,caption);
+      caption='';captionAttrs={};
+      return rendered;
+    }
     if(!mermaid)throw new Error('Este documento usa Mermaid. Instale Mermaid CLI na pasta tools/mermaid do projeto: npm install --prefix tools/mermaid @mermaid-js/mermaid-cli.');
     const input=path.join(directory,`diagram-${++figure}.mmd`),output=input+'.png';await fs.writeFile(input,code);
     const executable=/\.[cm]?js$/i.test(mermaid)?(node||'node'):mermaid;
@@ -101,9 +113,34 @@ async function transpile(source,{base,directory,paper='a4',mermaid='',node='',si
     if(signal?.aborted)throw new Error('Compilação cancelada.');
     const {text:line,base:origin,line:number}=lines[i],trim=line.trim();let match;
     try {
+      if((match=trim.match(/^@(header|footer)\[(all|first|odd|even|[1-9]\d{0,5})\]\[(left|center|right)\]\s+(.+)$/))){
+        closeLists();
+        pageRules.push({kind:match[1],scope:match[2],position:match[3],text:match[4]==='none'?'':match[4]});
+        continue;
+      }
+      if((match=trim.match(/^@(headline|contact)\s+(.+)$/))){
+        if(type!=='cv')throw new Error('@'+match[1]+' requer @type cv.');
+        if(match[1]==='headline')headline=match[2];else contacts.push(match[2]);
+        continue;
+      }
+      if((match=trim.match(/^@cv-entry\[([^\]]*)\]\[([^\]]*)\]\s+(.+)$/))){
+        if(type!=='cv')throw new Error('@cv-entry requer @type cv.');
+        closeLists();
+        const [role,...organization]=match[3].split(' | ');
+        body.push(cvEntry(role,organization.join(' | '),match[1],match[2],value=>inline(value,context)));
+        continue;
+      }
+      if((match=trim.match(/^@(matrix|equation)\[([^\]]*)\]\[\s*$/))){
+        closeLists();
+        const rows=[];
+        while(++i<lines.length && lines[i].text.trim()!==']')rows.push(lines[i].text);
+        if(i===lines.length)throw new Error('@'+match[1]+' sem ] de fechamento.');
+        body.push(match[1]==='matrix'?'\\[\n'+math(matrix(match[2],rows.join('\n')))+'\n\\]':equation(match[2],rows,math));
+        continue;
+      }
       if((match=line.match(/^@(title|author|date|type)\s+(.+)$/))) {
         closeLists();const value=match[2].replace(/\s+#\s+.*$/,'').trim();
-        if(match[1]==='title')title=value;else if(match[1]==='date')date=value;else if(match[1]==='author')authors.push(value);else {if(!['article','report'].includes(value))throw new Error('@type deve ser article ou report.');type=value;}continue;
+        if(match[1]==='title')title=value;else if(match[1]==='date')date=value;else if(match[1]==='author')authors.push(value);else {if(!['article','report','cv'].includes(value))throw new Error('@type deve ser article, report ou cv.');type=value;}continue;
       }
       if((match=line.match(/^(\s*)([-*]|\d+[.)]|[a-zA-Z]+[.)])\s+(.+)$/))) {
         const indent=match[1].replace(/\t/g,'    ').length,marker=match[2];
@@ -114,7 +151,10 @@ async function transpile(source,{base,directory,paper='a4',mermaid='',node='',si
           const kind=/^\d/.test(marker)?'arabic':/^[ivxlcdm]+[.)]$/.test(marker)?'roman':/^[IVXLCDM]+[.)]$/.test(marker)?'Roman':/^[A-Z]/.test(marker)?'Alph':'alph';
           body.push(`\\begin{${environment}}${environment==='enumerate'?`[label=\\${kind}*${marker.endsWith(')')?')':'.'}]`:''}`);lists.push({indent,environment});
         }
-        body.push(`\\item ${inline(match[3],context)}`);continue;
+        const task=environment==='itemize'&&match[3].match(/^\[([ xX])\]\s+(.+)$/);
+        if(task)body.push('\\item[$'+(task[1]===' '?'\\square':'\\boxtimes')+'$] '+inline(task[2],context));
+        else body.push(`\\item ${inline(match[3],context)}`);
+        continue;
       }
       if(!trim){body.push('');continue;}closeLists();
       if((match=trim.match(/^@align\(([^)]*)\)\[\s*$/))){
@@ -156,7 +196,7 @@ async function transpile(source,{base,directory,paper='a4',mermaid='',node='',si
       }
       if((match=line.match(/^(#{1,3})\s+(.+)$/))){body.push(`\\${(type==='report'?['chapter','section','subsection']:['section','subsection','subsubsection'])[match[1].length-1]}{${inline(match[2],context)}}`);continue;}
       if(/^@print_bibliography(?:\[style=\w+\])?\s*$/.test(line)){body.push('\u0001BIBLIOGRAPHY\u0001');continue;}
-      if(/^@\w+/.test(line)&&!/^@(cite|ref|autoref|pageref)\(/.test(line))throw new Error(`Diretiva desconhecida: ${line.split(/\s/)[0]}`);
+      if(/^@\w+/.test(line)&&!/^@(cite|ref|autoref|pageref|eqref)\(/.test(line))throw new Error(`Diretiva desconhecida: ${line.split(/\s/)[0]}`);
       body.push(inline(line,context));
     }catch(error){throw new Error(`Linha ${number}: ${error.message}`);}
   }
@@ -182,7 +222,10 @@ async function transpile(source,{base,directory,paper='a4',mermaid='',node='',si
   const classSize=['10pt','11pt','12pt'].includes(fontsize)?fontsize:'12pt';
   const geometry=[layout.page.size.toLowerCase()+'paper',layout.page.orientation,...Object.entries(layout.margins).map(([key,value])=>`${key}=${value}`)].join(',');
   const fonts=await fontPreamble(layout.typography.font,directory);
-  const tex=`\\documentclass[${classSize},${layout.page.size.toLowerCase()}paper]{${type}}
+  const format=value=>inline(value,context);
+  const stationery=pageStyle(pageRules,format,type==='report');
+  const opening=type==='cv'?cvHeader(title||authors[0]||'Currículo',headline,contacts,format):(title?'\\maketitle':'');
+  const tex=`\\documentclass[${classSize},${layout.page.size.toLowerCase()}paper]{${type==='cv'?'article':type}}
 \\usepackage[utf8]{inputenc}
 \\usepackage[T1]{fontenc}
 ${fonts}
@@ -200,11 +243,13 @@ ${classSize!==fontsize?`\\usepackage[fontsize=${fontsize}]{scrextend}`:''}
 \\renewcommand{\\tablename}{Tabela}
 \\providecommand{\\figureautorefname}{Figura}
 \\providecommand{\\tableautorefname}{Tabela}
+${stationery}
+${type==='cv'?'\\setcounter{secnumdepth}{0}\n\\setlength{\\parindent}{0pt}':''}
 \\title{${inline(title,context)}}
 \\author{${formattedAuthors}}
 \\date{${date==='@today'?'\\today':inline(date,context)}}
 \\begin{document}
-${title?'\\maketitle':''}
+${opening}
 ${body.join('\n').replaceAll('\u0001BIBLIOGRAPHY\u0001',bibliography)}
 \\end{document}
 `;

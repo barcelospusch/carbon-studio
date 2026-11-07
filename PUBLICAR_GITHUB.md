@@ -18,7 +18,7 @@ git init -b main
 git add .
 git status --short
 git diff --cached --stat
-git commit -m "Publica Carbon Studio 0.2.0"
+git commit -m "Publica Carbon Studio 0.3.1"
 git remote add origin https://github.com/barcelospusch/carbon-studio.git
 git push -u origin main
 ```
@@ -78,25 +78,32 @@ cd /d D:\CARBON\DOCS\carbon-studio-github
 git status
 git add .
 git diff --cached --stat
-git commit -m "Atualiza Carbon Studio para 0.2.0"
+git commit -m "Atualiza Carbon Studio para 0.3.1"
 git push
 ```
 
 ## 4. Publicar os executáveis em Releases
 
-Os instaladores não entram nos commits. Depois de enviar o código, crie uma Release no GitHub com a tag `v0.2.0` e anexe:
+Os executáveis ficam nos anexos da release. Depois de gerar o build, publique o código em uma branch de versão e anexe estes arquivos:
 
-- `release\Carbon-Studio-0.2.0-x64-Setup.exe`
-- `release\Carbon-Studio-0.2.0-x64-Portable.exe`
+- `release\Carbon-Studio-0.3.1-x64-Setup.exe`
+- `release\Carbon-Studio-0.3.1-x64-Portable.exe`
 
-Isso também pode ser feito pelo CMD se o **GitHub CLI (`gh`)** estiver instalado:
+Execute no CMD com o Git e o GitHub CLI (`gh`) instalados:
 
 ```cmd
 cd /d D:\CARBON\DOCS\studio-app
 gh auth login
-gh release create v0.2.0 "release\Carbon-Studio-0.2.0-x64-Setup.exe" "release\Carbon-Studio-0.2.0-x64-Portable.exe" --repo barcelospusch/carbon-studio --target main --title "Carbon Studio 0.2.0" --notes "Projetos por pasta, temas locais, autoria padrão e ícones SVG personalizados."
+git switch -c release/0.3.1
+git add -A
+git diff --cached --stat
+git commit -m "Lanca Carbon Studio 0.3.1"
+git push -u origin release/0.3.1
+git tag -a v0.3.1 -m "Carbon Studio 0.3.1"
+git push origin v0.3.1
+gh release create v0.3.1 "release\Carbon-Studio-0.3.1-x64-Setup.exe" "release\Carbon-Studio-0.3.1-x64-Portable.exe" --repo barcelospusch/carbon-studio --verify-tag --latest --title "Carbon Studio 0.3.1" --notes-file RELEASE_0.3.1.md
 ```
 
-Use esse comando depois de o código correspondente estar em `main`, com os executáveis gerados a partir dele. O exemplo cria uma nova Release; se a tag ou Release já existir, utilize a existente.
+Confira a lista de arquivos preparada pelo Git antes de fazer o commit. A tag aponta para o commit da branch de release que corresponde aos executáveis. Se a branch já existir, use `git switch release/0.3.1`. Se a tag ou a release já existir no GitHub, confira o commit associado antes de continuar.
 
 Nenhum comando de publicação é executado automaticamente por este guia.
