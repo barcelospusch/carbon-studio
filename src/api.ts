@@ -8,14 +8,20 @@ export interface CompileResult { bytes:Uint8Array;duration:number;stale:boolean 
 export interface StudioEvent { type:string;document?:DocumentState;replaceText?:boolean;action?:string;message?:string;stream?:string;text?:string;duration?:number;stale?:boolean }
 export interface Api {
   bootstrap():Promise<Result<{document:DocumentState;settings:Settings;themes:StudioTheme[];themesDirectory:string;version:string;platform:string}>>;
-  newDocument():Promise<Result<DocumentState|null>>; openDocument():Promise<Result<DocumentState|null>>;
+  newDocument(type?:'article'|'cv'):Promise<Result<DocumentState|null>>; openDocument():Promise<Result<DocumentState|null>>;
   selectDocument(relative:string):Promise<Result<DocumentState|null>>;refreshProject():Promise<Result<DocumentState>>;
+  projectItem(item:{kind:'folder'|'file'|'import-folder'|'import-file';folder:string;name?:string}):Promise<Result<DocumentState|null>>;
+  imagePreview(link:string):Promise<Result<{url:string;extension:string}>>;
+  imageImport(item:{link:string;folder:string;name:string}):Promise<Result<DocumentState>>;
+  projectImage(item:{root:string;relative:string}):Promise<Result<string>>;
+  manageImage(item:{root:string;relative:string;action:'rename'|'move'|'delete';value:string}):Promise<Result<{relative:string|null}|null>>;
   saveDocument(saveAs:boolean):Promise<Result<DocumentState|null>>; updateText(text:string):void;
   compile():Promise<Result<CompileResult|null>>; cancelCompile():Promise<Result<null>>;
   exportPdf():Promise<Result<string|null>>; chooseImage():Promise<Result<string|null>>;
   getSettings():Promise<Result<Settings>>;saveSettings(settings:Settings):Promise<Result<Settings>>;
   getThemes():Promise<Result<{themes:StudioTheme[];directory:string;errors:string[]}>>;
   openRepository():Promise<Result<void>>;openThemesFolder():Promise<Result<null>>;
+  checkUpdate():Promise<Result<string|null>>;openUpdate():Promise<Result<void|null>>;
   getLayout(source:string):Promise<Result<DocumentLayout>>;
   applyLayout(source:string,layout:DocumentLayout):Promise<Result<string>>;
   alignText(source:string,selection:TextRange,target:'block'|'column'|'cell',mode:string):Promise<Result<{range:TextRange;text:string}>>;

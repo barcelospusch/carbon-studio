@@ -2,7 +2,7 @@ import {icon} from './icons';
 import type {editor as MonacoEditor} from 'monaco-editor/editor/editor.api.js';
 
 export function installTextPanel(editor:MonacoEditor.IStandaloneCodeEditor,toast:(message:string)=>void){
-  document.querySelector('.sidebar-section')!.insertAdjacentHTML('beforeend',`<button id="text-alignment">${icon('alignment')} <span>Alinhamento de texto</span></button>`);
+  document.querySelector('#format-tools')!.insertAdjacentHTML('beforeend',`<button id="text-alignment">${icon('alignment')} <span>Alinhamento de texto</span></button>`);
   document.body.insertAdjacentHTML('beforeend',`
   <dialog id="alignment-dialog"><form id="alignment-form">
     <header><div><small>FORMATAÇÃO DO CONTEÚDO</small><h2>Alinhamento de texto</h2></div><button type="button" data-close-alignment aria-label="Fechar alinhamento">${icon('close')}</button></header>

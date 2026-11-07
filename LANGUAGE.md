@@ -504,3 +504,125 @@ Use **Alinhamento de texto** no painel lateral:
 As alterações são feitas no código, podem ser desfeitas/refeitas e precisam ser salvas e recompiladas. O editor realça `@align` e oferece sugestões ao digitar `@`, com sintaxe inline para células.
 
 Exemplo autocontido: `studio-app/examples/alinhamento.cb`.
+
+
+---
+
+## Listas de tarefas
+
+Use - [ ] para tarefas em aberto e - [X] para concluídas. Os marcadores são renderizados como caixas no PDF.
+
+## Currículos
+
+Use o botão **Currículo** da tela inicial ou declare `@type cv` antes dos campos do currículo. Informe o nome em `@title`, a área de atuação em `@headline` e cada meio de contato em um `@contact`. Os títulos de seção usam a mesma sintaxe do Carbon e aparecem sem numeração no PDF.
+
+```carbon
+@type cv
+@title Ana Silva
+@headline Engenheira de software
+@contact São Paulo, Brasil
+@contact ana@example.com
+@contact [Portfólio](https://example.com)
+
+# Experiência
+@cv-entry[2024 — atual][São Paulo] Engenheira | Empresa Exemplo
+- Automatizei a validação dos resultados de pesquisa.
+
+# Formação
+@cv-entry[2020 — 2024][São Paulo] Engenharia | Universidade Exemplo
+```
+
+`@cv-entry[período][local] Título | Organização` alinha período e local à direita. Os campos entre colchetes podem ficar vazios. O template usa o autor padrão como nome e a instituição padrão como contato.
+
+O formato usa a organização por contatos, seções e entradas datadas do [RenderCV](https://github.com/rendercv/rendercv) como referência. A fonte é Carbon e a saída é composta pelo Tectonic.
+
+---
+
+## Matemática
+
+Use `$...$` em um parágrafo e `$$...$$` para fórmulas em destaque. A lista **Símbolos** da barra agrupa comandos LaTeX em gregas, setas, operadores, relações e miscelânea.
+
+## Matrizes
+
+Uma matriz inline usa `@matrix[delimitador]{células}` dentro de `$...$`. Separe colunas com vírgulas e linhas com ponto e vírgula.
+
+```carbon
+A identidade é $I = @matrix[parentheses]{1, 0; 0, 1}$.
+```
+
+Em bloco, use uma linha por linha da matriz e feche com `]`.
+
+```carbon
+@matrix[brackets][
+1, 2
+3, \frac{1}{2}
+]
+```
+
+Delimitadores disponíveis. `none`, `parentheses`, `brackets`, `braces`, `bars` e `double-bars`. Todas as linhas devem ter o mesmo número de células. Use ponto decimal, já que a vírgula separa colunas.
+
+## Equações alinhadas e referências
+
+```carbon
+@equation[align=equals label=eq:energia number=1][
+E = mc^2
+m = \frac{E}{c^2}
+]
+
+Veja a equação @eqref(eq:energia).
+```
+
+- `align=equals` alinha no primeiro sinal de igualdade fora de grupos LaTeX. É o padrão.
+- `align=left`, `align=right` e `align=center` posicionam as linhas na área de texto.
+- `number=auto` usa o contador do LaTeX. Um inteiro define o número exibido entre parênteses.
+- `label=eq:nome` cria uma referência. Com label e sem number, a numeração é automática.
+
+Use `@eqref(eq:nome)` para obter o número entre parênteses.
+
+---
+
+## Cabeçalhos, rodapés e paginação
+
+Cada regra define uma área, um conjunto de páginas e uma posição. Use `@header[escopo][posição] Texto` ou `@footer[escopo][posição] Texto` em uma linha própria.
+
+```carbon
+@header[all][left] Notas de pesquisa
+@header[first][left] Apresentação
+@header[even][right] Verso
+@header[2][left] Demonstração
+@footer[all][right] Página {page} de {pages}
+```
+
+As posições são `left`, `center` e `right`. Os escopos são `all`, `first`, `odd`, `even` e um número de página. Para a mesma área e posição, um número específico tem prioridade sobre a primeira página, a paridade e a regra geral. A última declaração ganha quando repete o mesmo escopo e posição. Use `none` como texto para deixar um campo vazio.
+
+| Texto da regra | Exemplo no PDF |
+| --- | --- |
+| `Página {page}` | Página 2 |
+| `Página {page} de {pages}` | Página 2 de 5 |
+| `{page}` | 2 |
+| `{page} de {pages}` | 2 de 5 |
+| `{page}/{pages}` | 2/5 |
+
+O Studio usa referências LaTeX para o total de páginas. A compilação resolve o total e as referências automaticamente.
+
+---
+
+## Projetos, arquivos e Mermaid
+
+Abra uma pasta para usar os controles sobre a árvore de arquivos. Escolha a pasta principal ou uma subpasta ao criar um diretório, criar um documento `.cb` ou copiar um item do computador. O Studio mantém os arquivos com nomes já existentes.
+
+Para importar uma imagem, informe uma URL HTTP ou HTTPS, carregue a prévia e escolha o destino e o nome. O Studio aceita PNG e JPEG de até 12 MiB e usa a extensão do formato recebido. Depois, referencie o arquivo com `![Legenda](figuras/nome.png)`. O caminho é relativo ao documento que contém a figura.
+
+## Mermaid integrado
+
+Insira o bloco abaixo e compile pelo Studio.
+
+````carbon
+```mermaid
+flowchart LR
+  A[Escrever] --> B[Compilar]
+  B --> C[Exportar]
+```
+````
+
+As bibliotecas `.mmd` importadas com `@import` e as chamadas `@mermaid #fig:id` continuam disponíveis. O Studio desenha os diagramas em uma janela isolada do Chromium que já acompanha o Electron. O diagrama é convertido em PNG para inclusão no PDF. O renderizador bloqueia acesso externo e desabilita rótulos HTML na configuração padrão.

@@ -1,0 +1,21 @@
+@type cv
+@title Ana Silva
+@headline Engenheira de software e pesquisadora
+@contact São Paulo, Brasil
+@contact ana@example.com
+@contact [Portfólio](https://example.com)
+
+# Experiência
+@cv-entry[2024 — atual][São Paulo] Engenheira de software | Laboratório Exemplo
+- Desenvolvi ferramentas para automatizar a análise de resultados.
+- Documentei o processo de validação dos dados e treinei a equipe.
+
+# Formação
+@cv-entry[2020 — 2024][São Paulo] Engenharia de Computação | Universidade Exemplo
+- Projeto final sobre compilação de documentos técnicos.
+
+# Habilidades
+- TypeScript, Python, Git e LaTeX.
+
+# Idiomas
+- Português nativo e inglês avançado.

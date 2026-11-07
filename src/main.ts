@@ -6,7 +6,12 @@ import {installStartScreen} from './start-screen';
 import {createEditor,monaco} from './editor';
 import {PdfPreview} from './pdf';
 import {icon} from './icons';
+import logo from '../logo.png';
 import './monaco-icons';
+import {installOutline} from './outline';
+import {installProjectTools} from './project-tools';
+import {installProjectImages,isProjectImage} from './project-images';
+import {installSymbols,isMathContext} from './format-tools';
 import {installLayoutPanel} from './layout-panel';
 import {installTextPanel} from './text-panel';
 import type {DocumentState,Settings,Result,CompileResult,StudioTheme} from './api';
@@ -14,10 +19,10 @@ const api=window.carbonStudio;
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const button=(id:string,label:string,symbol:string,css='')=>`<button id="${id}" class="${css}" title="${label}" aria-label="${label}">${icon(symbol)}<span>${label}</span></button>`;
 $('app').innerHTML=`
-<header class="topbar"><div class="brand"><img class="brand-logo" src="./logo.png" alt="Carbon Studio"/><span>carbon<span class="brand-light">studio</span></span></div><div class="document-heading"><span id="header-name">Sem título.cb</span><span id="save-label" class="save-label">Novo documento</span></div><div class="top-actions">${button('open','Abrir pasta','folder','top-button')}${button('save','Salvar','save','top-button')}${button('preferences','Preferências','settings','icon-only top-button')}</div></header>
-<div class="app-body"><aside class="sidebar"><div class="workspace-label">ESPAÇO DE TRABALHO<button id="new" class="icon-only subtle" title="Começar do template" aria-label="Começar do template">${icon('plus')}</button></div><div class="project-title">${icon('folder')}<span id="project-name">Meu documento</span></div><div id="project-tree" class="project-tree"></div><div class="sidebar-section"><span>INSERIR NO DOCUMENTO</span><button data-snippet="heading">${icon('heading')}Título de seção</button><button data-snippet="math">${icon('math')}Equação</button><button id="insert-image">${icon('image')}Figura</button><button data-snippet="table">${icon('table')}Tabela</button><button data-snippet="mermaid">${icon('mermaid')}Diagrama Mermaid</button></div><div class="sidebar-bottom"><div class="workspace-tip"><span class="tip-icon">${icon('book')}</span><strong>Da ideia ao artigo.</strong><p>Escreva em Carbon.<br>Veja seu documento ganhar forma.</p><button id="syntax-help">Guia de sintaxe ${icon('arrowRight')}</button></div><div class="version"><span>CARBON STUDIO</span><span id="version">0.2.0</span><a id="repository-link" class="repository-link" href="https://github.com/barcelospusch/carbon-studio">${icon('github')}GitHub</a></div></div></aside>
-<main class="workspace show-start"><div class="workspace-toolbar"><div class="view-label">${icon('split')}Editor & prévia<span class="pill">.cb</span></div><div class="compile-actions"><span id="compile-status" class="compile-status"><i></i>Pronto para compilar</span>${button('compile','Recompilar','play','primary')}<button id="cancel" class="cancel hidden">${icon('stop')}Cancelar</button>${button('export','Exportar PDF','download','export-button')}</div></div>
-<div class="panels" id="panels"><section class="editor-panel"><div class="panel-header editor-tab"><span>${icon('file')}<strong id="tab-name">Sem título.cb</strong><i id="dirty-dot" class="dirty-dot hidden"></i></span><span class="editor-language">CARBON</span></div><div class="editor-tools"><span class="breadcrumbs" id="breadcrumbs">documento / sem-título.cb</span><div><button id="bold" title="Negrito" aria-label="Negrito">${icon('bold')}</button><button id="italic" title="Itálico" aria-label="Itálico">${icon('italic')}</button><span class="tools-divider"></span><button id="find" title="Buscar no documento" aria-label="Buscar no documento">Buscar <kbd>Ctrl F</kbd></button></div></div><div id="editor" class="code-editor"></div><div class="editor-footer"><span id="cursor-position">Ln 1, Col 1</span><span id="word-count">0 palavras</span><span>UTF-8</span><span>Carbon</span></div></section>
+<header class="topbar"><div class="brand"><img class="brand-logo" src="${logo}" alt="Carbon Studio"/><span>carbon<span class="brand-light">studio</span></span></div><div class="document-heading"><span id="header-name">Sem título.cb</span><span id="save-label" class="save-label">Novo documento</span></div><div class="top-actions">${button('open','Abrir pasta','folder','top-button')}${button('save','Salvar','save','top-button')}${button('preferences','Preferências','settings','icon-only top-button')}</div></header>
+<div class="app-body"><aside class="sidebar"><div class="workspace-label">ESPAÇO DE TRABALHO<button id="new" class="icon-only subtle" title="Começar do template" aria-label="Começar do template">${icon('plus')}</button></div><div class="project-title">${icon('folder')}<span id="project-name">Meu documento</span></div><div id="project-actions" class="project-actions"></div><div id="project-tree" class="project-tree"></div><section class="document-structure"><h2>ESTRUTURA DO DOCUMENTO</h2><div id="document-outline"></div></section><div class="sidebar-bottom">${button('syntax-help','Guia de sintaxe','book','sidebar-button')}${button('release-update','Atualização disponível','download','sidebar-button primary hidden')}<div class="version"><span>CARBON STUDIO</span><span id="version">0.3.1</span><a id="repository-link" class="repository-link" href="https://github.com/barcelospusch/carbon-studio">${icon('github')}GitHub</a></div></div></aside>
+<main class="workspace show-start"><div class="workspace-toolbar"><div class="view-label">${icon('split')}Editor & prévia<span class="pill">.cb</span></div><div class="compile-actions"><span id="compile-status" class="compile-status"><i></i>Pronto para compilar</span>${button('compile','Recompilar','play','primary')}${button('cancel','Cancelar','stop','cancel hidden')}${button('export','Exportar PDF','download','export-button')}</div></div>
+<div class="panels" id="panels"><section class="editor-panel"><div class="panel-header editor-tab"><span>${icon('file')}<strong id="tab-name">Sem título.cb</strong><i id="dirty-dot" class="dirty-dot hidden"></i></span><span class="editor-language">CARBON</span></div><div class="editor-tools"><span class="breadcrumbs" id="breadcrumbs">documento / sem-título.cb</span><div><span class="tools-divider"></span><button id="find" title="Buscar no documento" aria-label="Buscar no documento">Buscar <kbd>Ctrl F</kbd></button></div></div><div id="format-tools" class="format-tools" aria-label="Formatação"><button id="bold" title="Negrito" aria-label="Negrito">${icon('bold')}</button><button id="italic" title="Itálico" aria-label="Itálico">${icon('italic')}</button><button data-snippet="heading">${icon('heading')}Título de seção</button><button data-snippet="math">${icon('math')}Equação</button><button id="insert-image">${icon('image')}Figura</button><button data-snippet="table">${icon('table')}Tabela</button><button data-snippet="mermaid">${icon('mermaid')}Diagrama Mermaid</button><button data-snippet="task" title="Tarefa" aria-label="Tarefa">${icon('check')}<span>Tarefa</span></button><button data-snippet="matrix" title="Matriz" aria-label="Matriz">${icon('table')}<span>Matriz</span></button><button data-snippet="equation" title="Equações alinhadas" aria-label="Equações alinhadas">${icon('math')}<span>Equações alinhadas</span></button><button data-snippet="stationery" title="Cabeçalho e rodapé" aria-label="Cabeçalho e rodapé">${icon('layout')}<span>Cabeçalho e rodapé</span></button><button data-snippet="cv" title="Entrada de currículo" aria-label="Entrada de currículo">${icon('file')}<span>Entrada de currículo</span></button><select id="math-symbol" aria-label="Inserir símbolo matemático"><option value="">Símbolos</option></select></div><div id="editor" class="code-editor"></div><div class="editor-footer"><span id="cursor-position">Ln 1, Col 1</span><span id="word-count">0 palavras</span><span>UTF-8</span><span>Carbon</span></div></section>
 <div id="divider" class="divider" role="separator" tabindex="0" aria-label="Ajustar largura do editor" aria-orientation="vertical"></div>
 <section class="preview-panel"><div class="panel-header preview-tab"><span>${icon('file')}<strong>Prévia do documento</strong></span><span class="pdf-badge">PDF</span></div><div class="preview-tools"><div class="page-navigation"><button id="previous-page" class="icon-only" title="Página anterior" aria-label="Página anterior">${icon('arrowLeft')}</button><span><input id="page-number" type="number" min="1" value="1" aria-label="Número da página"/> <span id="page-total">/ —</span></span><button id="next-page" class="icon-only" title="Próxima página" aria-label="Próxima página">${icon('arrowRight')}</button></div><select id="zoom" aria-label="Zoom do PDF"><option value="fit">Ajustar à largura</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option></select></div><div id="stale-banner" class="stale-banner hidden">${icon('clock')}A prévia mostra uma versão anterior. Recompile para atualizar.</div><div id="pdf-host" class="pdf-host"></div><div id="empty-preview" class="empty-preview"><div class="empty-paper"><span></span><b></b><i></i><i></i><i></i><em>α + β = γ</em><i></i><i></i></div><h1>Seu próximo artigo<br>começa aqui.</h1><p>Edite o código à esquerda e recompile<br>para visualizar seu PDF neste espaço.</p><button id="empty-compile">${icon('play')}Compilar documento <kbd>Ctrl ↵</kbd></button><span class="empty-footnote">Tipografia acadêmica. Foco nas suas ideias.</span></div><div id="preview-loading" class="preview-loading hidden"><div class="spinner"></div><strong>Compondo seu documento</strong><span id="loading-detail">Na primeira execução, o motor pode preparar fontes e pacotes.</span></div></section></div>
 <section id="diagnostics" class="diagnostics hidden"><header><span>${icon('terminal')}Saída da compilação</span><button id="close-diagnostics" class="icon-only" title="Fechar saída" aria-label="Fechar saída">${icon('close')}</button></header><pre id="log-output" tabindex="0"></pre></section>
@@ -31,8 +36,22 @@ const preview=new PdfPreview($('pdf-host'),count=>{pages=count;$('page-total').t
 function toast(message:string){$('toast').textContent=message;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),4500);}
 installLayoutPanel(editor,toast);
 installTextPanel(editor,toast);
+for(const control of document.querySelectorAll<HTMLButtonElement>('#format-tools button')){
+  const label=control.getAttribute('aria-label')||control.title||control.textContent?.trim()||'Formatação';
+  control.title=label;
+  control.setAttribute('aria-label',label);
+}
+installOutline(editor);
+installProjectTools(()=>current);
+const images=installProjectImages(()=>current,toast);
+installSymbols(insert,()=>{
+ const model=editor.getModel(), position=editor.getPosition();
+ if(!model||!position)return false;
+ const prefix=model.getValueInRange({startLineNumber:1,startColumn:1,endLineNumber:position.lineNumber,endColumn:position.column});
+ return isMathContext(prefix);
+});
 let themes:StudioTheme[]=[];
-const renderStart=installStartScreen({open:()=>void safe(()=>action('open')),template:()=>void safe(()=>action('new')),select:relative=>void selectDocument(relative),refresh:()=>void safe(async()=>applyDocument(unwrap(await api.refreshProject()),false))});
+const renderStart=installStartScreen({open:()=>void safe(()=>action('open')),template:()=>void safe(()=>action('new')),cv:()=>void safe(()=>action('new-cv')),select:relative=>void selectDocument(relative),refresh:()=>void safe(async()=>applyDocument(unwrap(await api.refreshProject()),false))});
 function text(){return editor.getValue();}
 function unwrap<T>(value:Result<T>):T{if(!value.ok)throw new Error(value.error);return value.data;}
 async function safe(action:()=>Promise<unknown>){try{await action();}catch(error){toast(error instanceof Error?error.message:String(error));}}
@@ -44,25 +63,33 @@ function updateStatus(){
   const stale=lastCompiled!==null&&text()!==lastCompiled;$('stale-banner').classList.toggle('hidden',!stale);
   $('word-count').textContent=`${text().trim()?text().trim().split(/\s+/u).length:0} palavras`;
 }
-async function selectDocument(relative:string){await safe(async()=>{const doc=unwrap(await api.selectDocument(relative));if(doc)applyDocument(doc);});}
+async function selectDocument(relative:string){await safe(async()=>{const doc=unwrap(await api.selectDocument(relative));if(doc){images.close();applyDocument(doc);editor.focus();}});}
 function project(doc:DocumentState){
- $('project-name').textContent=doc.workspace?.split(/[\\/]/).pop()??'Nenhuma pasta selecionada';const tree=$('project-tree');tree.replaceChildren();
+ $('project-name').textContent=doc.workspace?.split(/[\\/]/).pop()??'Nenhuma pasta selecionada';const tree=$('project-tree');images.hideHover();tree.replaceChildren();
  const relative=doc.path&&doc.workspace?doc.path.replaceAll('\\','/').slice(doc.workspace.replaceAll('\\','/').length+1):null;
  for(const entry of doc.project){
-  const row=document.createElement(entry.kind==='cb'?'button':'div');row.className='tree-row'+(entry.name===relative?' active':'');row.style.paddingLeft=`${14+Math.min(entry.name.split(/[\\/]/).length-1,5)*12}px`;
-  const symbol=document.createElement('span');symbol.innerHTML=icon(entry.kind==='folder'?'folder':entry.kind==='cb'?'file':'image');const label=document.createElement('span');label.textContent=entry.name.split(/[\\/]/).pop()??entry.name;row.title=entry.name;row.append(symbol,label);tree.append(row);if(entry.kind==='cb')row.onclick=()=>void selectDocument(entry.name);
+  const image=isProjectImage(entry.kind);
+  const row=document.createElement(entry.kind==='cb'||image?'button':'div');row.className='tree-row'+(entry.name===relative?' active':'');row.style.paddingLeft=`${14+Math.min(entry.name.split(/[\\/]/).length-1,5)*12}px`;
+  const symbol=document.createElement('span');symbol.innerHTML=icon(entry.kind==='folder'?'folder':image?'image':'file');const label=document.createElement('span');label.textContent=entry.name.split(/[\\/]/).pop()??entry.name;row.title=entry.name;row.append(symbol,label);tree.append(row);
+  if(entry.kind==='cb')row.onclick=()=>void selectDocument(entry.name);
+  else if(image&&doc.workspace)images.bind(row as HTMLButtonElement,{root:doc.workspace,relative:entry.name});
  }
+ images.highlight();
 }
 function availability(){
  const active=!!current&&current.active!==false;
  for(const id of ['save','compile','empty-compile','bold','italic','find','document-layout','insert-page-break','element-position','text-alignment','insert-image'])($(id) as HTMLButtonElement).disabled=busy||!active;
  for(const button of document.querySelectorAll<HTMLButtonElement>('[data-snippet]'))button.disabled=busy||!active;
+ ($('math-symbol') as HTMLSelectElement).disabled=busy||!active;
+ for(const button of document.querySelectorAll<HTMLButtonElement>('[data-project-item]'))button.disabled=busy||!current?.workspace;
+ for(const button of document.querySelectorAll<HTMLButtonElement>('[data-project-image]'))button.disabled=busy;
  for(const id of ['new','open','preferences'])($(id) as HTMLButtonElement).disabled=busy;
  ($('export') as HTMLButtonElement).disabled=busy||!active||lastCompiled===null;
 }
 function applyDocument(doc:DocumentState,replaceText=true){
   const same=current?.path===doc.path&&text()===doc.text;
   const changedFile=current?.path!==doc.path||current?.active!==doc.active;
+  if(changedFile||current?.workspace!==doc.workspace)images.close();
   current=replaceText?doc:{...doc,text:text()};
   if(!same&&replaceText){applying=true;editor.setValue(doc.text);applying=false;editor.setPosition({lineNumber:1,column:1});}
   for(const id of ['header-name','tab-name'])$(id).textContent=doc.active===false?'Carbon Studio':name(doc.path);
@@ -75,7 +102,7 @@ function status(label:string,kind='ready'){$('compile-status').className=`compil
 function setBusy(value:boolean){busy=value;$('cancel').classList.toggle('hidden',!value);$('preview-loading').classList.toggle('hidden',!value);availability();}
 function log(message:string){const area=$('log-output');area.textContent=(area.textContent+message).slice(-262144);area.scrollTop=area.scrollHeight;}
 async function compile(){
-  if(busy||!current||current.active===false)return;api.updateText(text());const snapshot=text();setBusy(true);$('log-output').textContent='';$('error-count').textContent='';status('Compilando…','compiling');
+  if(busy||!current||current.active===false)return;images.close();api.updateText(text());const snapshot=text();setBusy(true);$('log-output').textContent='';$('error-count').textContent='';status('Compilando…','compiling');
   try{
     const result=unwrap(await api.compile());if(!result){status('Compilação cancelada');return;}
     $('empty-preview').classList.add('hidden');await preview.load(result.bytes);
@@ -87,8 +114,8 @@ async function compile(){
 }
 async function action(id:string){
   switch(id){
-    case'new':{const doc=unwrap(await api.newDocument());if(doc)applyDocument(doc);break;}
-    case'open':{const doc=unwrap(await api.openDocument());if(doc)applyDocument(doc);break;}
+    case'new':case'new-cv':{const doc=unwrap(await api.newDocument(id==='new-cv'?'cv':'article'));if(doc){images.close();applyDocument(doc);}break;}
+    case'open':{const doc=unwrap(await api.openDocument());if(doc){images.close();applyDocument(doc);}break;}
     case'save':case'save-as':{api.updateText(text());const doc=unwrap(await api.saveDocument(id==='save-as'));if(doc){applyDocument(doc,false);toast('Documento salvo.');}break;}
     case'compile':await compile();break;
     case'export':{const path=unwrap(await api.exportPdf());if(path)toast('PDF exportado.');break;}
@@ -103,6 +130,7 @@ function insert(value:string){const selection=editor.getSelection();if(!selectio
 function wrap(marker:string){const selected=editor.getModel()?.getValueInRange(editor.getSelection()!)??'';insert(`${marker}${selected||'texto'}${marker}`);}
 $('bold').onclick=()=>wrap('**');$('italic').onclick=()=>wrap('*');$('find').onclick=()=>{editor.focus();void editor.getAction('actions.find')?.run();};
 const snippets:Record<string,string>={heading:'\n# Nova seção\n',math:'\n$$\nf(x) = \\frac{\\alpha x + \\beta}{\\sqrt{1+x^2}}\n$$\n',table:'\n@caption Descrição da tabela.\n| Coluna A | Coluna B |\n| --- | --- |\n| Valor | Resultado |\n',mermaid:'\n@caption Fluxo de processamento.\n```mermaid {#fig:fluxo width=90%}\nflowchart LR\n    A[Entrada] --> B[Processamento]\n    B --> C[Resultado]\n```\n\nVeja a Figura @ref(fig:fluxo).\n'};
+Object.assign(snippets,{"task":"\n- [ ] Nova tarefa\n- [X] Tarefa concluída\n","matrix":"\n@matrix[brackets][\n1, 2\n3, 4\n]\n","equation":"\n@equation[align=equals number=auto][\na + b = c\nc = d\n]\n","stationery":"\n@header[all][left] Título do documento\n@footer[all][right] Página {page} de {pages}\n","cv":"\n@cv-entry[2024 — atual][Cidade] Cargo | Organização\n- Descreva um resultado.\n"});
 for(const button of document.querySelectorAll<HTMLButtonElement>('[data-snippet]'))button.onclick=()=>insert(snippets[button.dataset.snippet!]);
 $('insert-image').onclick=()=>void safe(async()=>{const value=unwrap(await api.chooseImage());if(value)insert('\n'+value+'\n');});
 $('toggle-diagnostics').onclick=()=>$('diagnostics').classList.toggle('hidden');$('close-diagnostics').onclick=()=>$('diagnostics').classList.add('hidden');
@@ -122,6 +150,21 @@ settingsDialog.addEventListener('cancel',()=>applySelectedTheme(settings.theme))
 $('open-themes-folder').onclick=()=>void safe(()=>api.openThemesFolder());$('repository-link').onclick=event=>{event.preventDefault();void safe(()=>api.openRepository());};
 settingsForm.onsubmit=event=>{event.preventDefault();$('settings-error').textContent='';void(async()=>{try{const data=Object.fromEntries(new FormData(settingsForm)) as unknown as Settings;settings=unwrap(await api.saveSettings(data));applySelectedTheme(settings.theme);settingsDialog.close();toast('Preferências salvas neste dispositivo.');}catch(error){$('settings-error').textContent=error instanceof Error?error.message:String(error);}})();};
 const help=$<HTMLDialogElement>('help-dialog');$('syntax-help').onclick=()=>help.showModal();$('close-help').onclick=()=>help.close();
+const updateButton=$<HTMLButtonElement>('release-update');
+updateButton.onclick=()=>void safe(()=>api.openUpdate());
+async function refreshUpdate(){
+ const result=await api.checkUpdate().catch(()=>null);
+ const version=result?.ok?result.data:null;
+ updateButton.classList.toggle('hidden',!version);
+ if(version){
+  const label='Atualizar para v'+version;
+  updateButton.querySelector('span')!.textContent=label;
+  updateButton.title=label;
+  updateButton.setAttribute('aria-label',label);
+ }
+}
+void refreshUpdate();
+setInterval(()=>void refreshUpdate(),30*60*1000);
 api.onEvent(event=>{
   if(event.type==='document'&&event.document)applyDocument(event.document,event.replaceText!==false);
   else if(event.type==='action'&&event.action)void safe(()=>action(event.action!));

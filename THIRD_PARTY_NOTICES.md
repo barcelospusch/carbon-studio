@@ -6,6 +6,6 @@ O aplicativo incorpora Electron (MIT) e Chromium. Seus arquivos LICENSE e LICENS
 
 O motor Tectonic 0.17.0 é distribuído em resources/compiler/tectonic.exe. Projeto e avisos dos componentes: https://github.com/tectonic-typesetting/tectonic. Os pacotes TeX, fontes e demais componentes mantêm suas respectivas licenças.
 
-Mermaid CLI, Mermaid, Puppeteer e Chromium para diagramas são opcionais e instalados separadamente; mantêm suas próprias licenças. Projeto: https://github.com/mermaid-js/mermaid-cli.
+Mermaid é incorporado à interface de renderização e usa o Chromium do Electron. A licença acompanha a distribuição em resources/licenses/mermaid-LICENSE.txt. Projeto: https://github.com/mermaid-js/mermaid.
 
 As versões das ferramentas JavaScript estão fixadas em package-lock.json.
