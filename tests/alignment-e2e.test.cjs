@@ -1,0 +1,22 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
+const {_electron:electron}=require('playwright');const root=path.resolve(__dirname,'..');
+test('Studio aligns a selected paragraph, a table column and one cell with undo and validation',{timeout:180000},async t=>{
+ await fs.mkdir(path.join(root,'tmp'),{recursive:true});await fs.mkdir(path.join(root,'output'),{recursive:true});
+ const folder=await fs.mkdtemp(path.join(root,'tmp/alignment-ui-')),file=path.join(folder,'alinhamento.cb');
+ const original='# Alinhamento no Studio\nUm parágrafo com **destaque**.\n\n@caption Resultados. {#table:dados width=100% pos=[here]}\n| Parâmetro | Valor | Observação |\n| --- | --- | --- |\n| Status | OK | Concluído |\n';await fs.writeFile(file,original);
+ const runtime=await electron.launch({args:[root,file],cwd:root,env:{...process.env,CARBON_STUDIO_E2E:'1',CARBON_STUDIO_DATA_DIR:path.join(folder,'profile')},timeout:60000});
+ t.after(async()=>{await runtime.evaluate(({app})=>app.exit(0)).catch(()=>{});await runtime.close().catch(()=>{});});
+ const page=await runtime.firstWindow(),errors=[];page.on('pageerror',error=>errors.push(error.message));await page.waitForSelector('.monaco-editor',{timeout:30000}).catch(async error=>{console.log('RENDERER_ERRORS',errors);console.log('PAGE_STATE',await page.evaluate(()=>({url:location.href,body:document.body?.innerText,html:document.documentElement.outerHTML.slice(0,1500)})));throw error;});await page.waitForFunction(()=>document.getElementById('tab-name')?.textContent==='alinhamento.cb');
+ const input=page.locator('.monaco-editor textarea').first();
+ const locate=async(line,column=1)=>{await input.focus();await page.keyboard.press('Control+Home');for(let i=1;i<line;i++)await page.keyboard.press('ArrowDown');await page.keyboard.press('Home');for(let i=1;i<column;i++)await page.keyboard.press('ArrowRight');};
+ const save=async()=>{await page.click('#save');await page.waitForFunction(()=>document.getElementById('save-label')?.textContent==='Salvo no computador');return fs.readFile(file,'utf8');};
+ const apply=async(target,mode)=>{await page.click('#text-alignment');await page.locator('#alignment-form [name=target]').selectOption(target);await page.locator('#alignment-form [name=mode]').selectOption(mode);await page.click('#alignment-form button[type=submit]');await page.waitForFunction(()=>!document.getElementById('alignment-dialog').open);};
+ await locate(2);await page.keyboard.press('Shift+End');await apply('block','center');assert.equal(await fs.readFile(file,'utf8'),original);let saved=await save();assert.match(saved,/@align\(center\)\[\nUm parágrafo com \*\*destaque\*\*\.\n\]/);
+ let row=saved.split('\n').findIndex(line=>line.startsWith('| Status')),column=saved.split('\n')[row].indexOf('OK')+1;await locate(row+1,column);await apply('column','center');saved=await save();assert.match(saved,/\| --- \| :---: \| --- \|/);
+ row=saved.split('\n').findIndex(line=>line.startsWith('| Status'));column=saved.split('\n')[row].indexOf('OK')+1;await locate(row+1,column);await apply('cell','right');saved=await save();assert.match(saved,/\| Status \| @align\(right\)\[OK\] \| Concluído \|/);
+ await input.focus();await page.keyboard.press('Control+z');assert.doesNotMatch(await save(),/@align\(right\)\[OK\]/);await input.focus();await page.keyboard.press('Control+y');saved=await save();assert.match(saved,/@align\(right\)\[OK\]/);
+ await locate(1);await page.click('#text-alignment');await page.locator('#alignment-form [name=target]').selectOption('column');await page.click('#alignment-form button[type=submit]');await page.waitForFunction(()=>document.getElementById('alignment-error')?.textContent?.includes('tabela'));await page.click('#alignment-form [data-close-alignment]');assert.equal(await fs.readFile(file,'utf8'),saved);
+ await page.click('#compile');await page.waitForFunction(()=>document.getElementById('compile-status')?.textContent?.includes('PDF atualizado'),{},{timeout:120000});await page.waitForSelector('.pdf-page canvas');assert.equal(await page.locator('#page-total').innerText(),'/ 1');
+ await locate(1);await page.screenshot({path:path.join(root,'output/studio-alinhamento.png'),fullPage:true});assert.deepEqual(errors,[]);
+});

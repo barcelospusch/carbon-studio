@@ -1,0 +1,74 @@
+{
+  "id": "github-dark",
+  "label": "GitHub Dark",
+  "appearance": "dark",
+  "ui": {
+    "background": "#0d1117",
+    "foreground": "#e6edf3",
+    "surface": "#161b22",
+    "surfaceAlt": "#21262d",
+    "raised": "#30363d",
+    "border": "#30363d",
+    "muted": "#9ba5b1",
+    "accent": "#238636",
+    "accentForeground": "#ffffff",
+    "header": "#010409",
+    "headerForeground": "#e6edf3",
+    "preview": "#090c10"
+  },
+  "editor": {
+    "base": "vs-dark",
+    "inherit": true,
+    "rules": [
+      {
+        "token": "keyword",
+        "foreground": "FF7B72"
+      },
+      {
+        "token": "heading",
+        "foreground": "e6edf3",
+        "fontStyle": "bold"
+      },
+      {
+        "token": "strong",
+        "foreground": "A5D6FF",
+        "fontStyle": "bold"
+      },
+      {
+        "token": "emphasis",
+        "foreground": "e6edf3",
+        "fontStyle": "italic"
+      },
+      {
+        "token": "number",
+        "foreground": "79C0FF"
+      },
+      {
+        "token": "type.identifier",
+        "foreground": "FFA657"
+      },
+      {
+        "token": "function",
+        "foreground": "D2A8FF"
+      },
+      {
+        "token": "code",
+        "foreground": "e6edf3"
+      },
+      {
+        "token": "delimiter",
+        "foreground": "9ba5b1"
+      }
+    ],
+    "colors": {
+      "editor.background": "#0d1117",
+      "editor.foreground": "#e6edf3",
+      "editorLineNumber.foreground": "#9ba5b1",
+      "editorLineNumber.activeForeground": "#e6edf3",
+      "editorCursor.foreground": "#238636",
+      "editor.selectionBackground": "#60609066",
+      "editor.lineHighlightBackground": "#ffffff09",
+      "editorOverviewRuler.border": "#0d1117"
+    }
+  }
+}

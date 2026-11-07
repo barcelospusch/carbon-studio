@@ -1,0 +1,34 @@
+@title Ciência com simplicidade
+@type article
+@author [Ana Silva]{Laboratório Carbon}
+@date @today
+
+@toc[title="Conteúdo"]
+
+# Introdução
+Uma linguagem simples, com a composição tipográfica do LaTeX.
+Escreva com **clareza**, _ênfase_ e matemática $E = mc^2$.
+
+## Objetivos
+- Escrever documentos científicos.
+- Trabalhar com equações e tabelas.
+  - Preservar a qualidade tipográfica.
+
+# Método
+$$
+\begin{aligned}
+f(x) &= \frac{\alpha x^2 + \beta}{\sqrt{1+x^2}} \\
+g(x) &= \sum_{i=1}^{n} x_i
+\end{aligned}
+$$
+
+@caption Resultados do experimento. {#table:resultados width=100%}
+| Método | Amostras | Resultado |
+| --- | --- | --- |
+| Carbon | 120 | **Aprovado** |
+| Referência | 120 | Comparável |
+
+Os dados estão na @autoref(table:resultados).
+
+# Conclusão
+Da ideia ao documento, sem perder o foco na escrita.

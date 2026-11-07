@@ -1,0 +1,30 @@
+@title Relatório de pesquisa
+@type report
+@author [Ana Silva]{Laboratório de Pesquisa}
+@author [João Souza]{Instituto de Ciências}
+@date @today
+@import referencias.cb
+
+@toc[title="Conteúdo"]
+
+# Introdução
+A escrita científica pode ser mais simples sem perder a qualidade de composição.
+Este documento foi produzido com o Carbon Studio @cite(carbon2026).
+
+## Objetivos
+a. Organizar a pesquisa.
+b. Apresentar os resultados.
+   i. Descrever a metodologia.
+   ii. Discutir as observações.
+
+# Resultados
+@caption Comparação dos resultados. {#table:comparacao width=100%}
+| Grupo | Medida |
+| --- | --- |
+| Controle | $1.0 \pm 0.1$ |
+| Experimental | $1.5 \pm 0.2$ |
+
+A @autoref(table:comparacao) está na página @pageref(table:comparacao).
+
+# Referências
+@print_bibliography[style=abnt]

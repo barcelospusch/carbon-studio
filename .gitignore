@@ -1,0 +1,27 @@
+# Dependências e artefatos gerados
+node_modules/
+/dist/
+/release/
+/build/
+/tmp/
+/output/
+.cache/
+.vite/
+*.tsbuildinfo
+
+# Dados locais e credenciais de desenvolvimento
+/profile/
+/profiles/
+/settings.json
+/recovery.json
+.env
+.env.*
+!.env.example
+*.log
+*.pfx
+*.p12
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+Desktop.ini

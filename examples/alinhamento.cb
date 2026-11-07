@@ -1,0 +1,38 @@
+@page {size: A4}
+@margins {top: 2cm, bottom: 2cm, left: 2cm, right: 2cm}
+
+# Alinhamento de texto e tabelas
+
+@align(left)[
+Alinhado à esquerda.
+]
+
+@align(center)[
+Texto centralizado.
+]
+
+@align(right)[
+Alinhado à direita.
+]
+
+@align(justify)[
+O Carbon permite escrever documentos científicos com controle sobre a apresentação dos parágrafos. Este bloco distribui o texto entre as duas margens, preservando a composição e a hifenização do LaTeX. O alinhamento é aplicado somente ao bloco declarado, mantendo a formatação do conteúdo que aparece depois de seu fechamento.
+]
+
+@align(right)[
+Bloco externo à direita.
+@align(left)[
+Bloco interno à esquerda.
+]
+Retorno ao alinhamento externo.
+]
+
+Texto fora dos blocos.
+
+@caption Colunas e células com alinhamentos diferentes. {#table:alignment width=100% pos=[here]}
+| Esquerda | Centro | Direita | Justificado |
+| :--- | :---: | ---: | :---= |
+| Item A | 100 | 15,00 | Uma descrição longa é distribuída entre as duas margens da célula. |
+| @align(right)[Exceção] | 250 | R$ 120,50 | Outra célula pode manter o alinhamento definido para a coluna. |
+
+Uma célula com @align tem prioridade sobre a coluna. As demais células mantêm seu alinhamento original.

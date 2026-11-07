@@ -1,0 +1,212 @@
+[
+  {
+    "key": "plus",
+    "file": "plus.svg",
+    "usage": "Adicionar / começar template",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "folder",
+    "file": "folder.svg",
+    "usage": "Abrir pasta, projeto e pastas na árvore",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "save",
+    "file": "save.svg",
+    "usage": "Salvar documento",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "play",
+    "file": "play.svg",
+    "usage": "Compilar e recompilar",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "stop",
+    "file": "stop.svg",
+    "usage": "Cancelar compilação",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "download",
+    "file": "download.svg",
+    "usage": "Exportar PDF",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "settings",
+    "file": "settings.svg",
+    "usage": "Preferências",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "code",
+    "file": "code.svg",
+    "usage": "Código genérico (disponível no registro)",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "file",
+    "file": "file.svg",
+    "usage": "Documento Carbon e prévia PDF",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "image",
+    "file": "image.svg",
+    "usage": "Inserir figura e arquivos de imagem",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "chevron",
+    "file": "chevron-right.svg",
+    "usage": "Seta de expansão (registrada, sem chamada direta)",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "chevronDown",
+    "file": "chevron-down.svg",
+    "usage": "Seta para baixo (registrada, sem chamada direta)",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "check",
+    "file": "check.svg",
+    "usage": "Confirmar (registrado, sem chamada direta)",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "alert",
+    "file": "alert.svg",
+    "usage": "Alerta (registrado, sem chamada direta)",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "close",
+    "file": "close.svg",
+    "usage": "Fechar painéis e modais; substitui também ✕",
+    "source": "src/icons.ts; src/layout-panel.ts; src/text-panel.ts"
+  },
+  {
+    "key": "terminal",
+    "file": "terminal.svg",
+    "usage": "Saída da compilação",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "book",
+    "file": "book.svg",
+    "usage": "Guia de sintaxe",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "split",
+    "file": "split.svg",
+    "usage": "Editor e prévia divididos; hoje também tabela",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "arrowLeft",
+    "file": "arrow-left.svg",
+    "usage": "Página anterior",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "arrowRight",
+    "file": "arrow-right.svg",
+    "usage": "Página seguinte e guia",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "refresh",
+    "file": "refresh.svg",
+    "usage": "Atualizar lista do projeto",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "clock",
+    "file": "clock.svg",
+    "usage": "Prévia desatualizada",
+    "source": "src/icons.ts"
+  },
+  {
+    "key": "heading",
+    "file": "heading.svg",
+    "usage": "Título de seção",
+    "source": "src/main.ts"
+  },
+  {
+    "key": "math",
+    "file": "math.svg",
+    "usage": "Inserir equação",
+    "source": "src/main.ts"
+  },
+  {
+    "key": "table",
+    "file": "table.svg",
+    "usage": "Inserir tabela",
+    "source": "src/main.ts"
+  },
+  {
+    "key": "mermaid",
+    "file": "mermaid.svg",
+    "usage": "Inserir diagrama Mermaid",
+    "source": "src/main.ts"
+  },
+  {
+    "key": "bold",
+    "file": "bold.svg",
+    "usage": "Negrito",
+    "source": "src/main.ts"
+  },
+  {
+    "key": "italic",
+    "file": "italic.svg",
+    "usage": "Itálico",
+    "source": "src/main.ts"
+  },
+  {
+    "key": "layout",
+    "file": "layout.svg",
+    "usage": "Layout do documento",
+    "source": "src/layout-panel.ts"
+  },
+  {
+    "key": "pageBreak",
+    "file": "page-break.svg",
+    "usage": "Quebra de página",
+    "source": "src/layout-panel.ts"
+  },
+  {
+    "key": "position",
+    "file": "position.svg",
+    "usage": "Posicionar figura / tabela",
+    "source": "src/layout-panel.ts"
+  },
+  {
+    "key": "alignment",
+    "file": "alignment.svg",
+    "usage": "Alinhamento de texto",
+    "source": "src/text-panel.ts"
+  },
+  {
+    "key": "github",
+    "file": "github.svg",
+    "usage": "Link GitHub no rodapé",
+    "source": "src/main.ts; src/icons.ts"
+  },
+  {
+    "key": "template",
+    "file": "template.svg",
+    "usage": "Começar do template",
+    "source": "src/start-screen.ts; src/icons.ts"
+  },
+  {
+    "key": "theme",
+    "file": "theme.svg",
+    "usage": "Tema nas preferências",
+    "source": "src/icons.ts"
+  }
+]

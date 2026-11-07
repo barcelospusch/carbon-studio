@@ -1,0 +1,48 @@
+'use strict';
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs/promises');const path=require('node:path');const { _electron:electron }=require('playwright');
+const desktop=path.resolve(__dirname,'..'),root=desktop;
+
+test('Windows editor: real compilation, unsaved snapshots, PDF preview, errors and export',{timeout:240000},async t=>{
+  await fs.mkdir(path.join(root,'tmp'),{recursive:true});await fs.mkdir(path.join(root,'output'),{recursive:true});
+  const dir=await fs.mkdtemp(path.join(root,'tmp/studio-e2e-'));
+  const project=path.join(dir,'Projeto com espaços');await fs.mkdir(project);
+  await fs.mkdir(path.join(project,'figuras'));await fs.copyFile(path.join(root,'logo.png'),path.join(project,'figuras/curva.png'));
+  const file=path.join(project,'artigo.cb');const original='@title Ciência, com simplicidade\n@author Ana Silva e João Souza\n@date Novembro de 2026\n\n# Introdução\nUm espaço para transformar ideias em documentos acadêmicos. Texto com **clareza**, *ênfase* e matemática $E=mc^2$.\n\n## Método\nA precisão está nos detalhes: títulos, espaçamentos e fórmulas são compostos para uma leitura natural.\n\n$$\nf(x) = \\frac{\\alpha x^2 + \\beta}{\\sqrt{1+x^2}}\n$$\n\n# Resultados\n@caption Curva de luz sintética, com recuperação do fluxo.\n![Descrição da curva.](figuras/curva.png){#fig:curva width=85%}\n\nO comportamento observado é apresentado na Figura @ref(fig:curva).\n\n# Conclusão\nA escrita científica começa com uma ideia.\n';
+  await fs.writeFile(file,original);
+  const runtime=await electron.launch({args:[desktop],cwd:root,env:{...process.env,CARBON_STUDIO_E2E:'1',CARBON_STUDIO_DATA_DIR:path.join(dir,'profile')},timeout:60000});
+  t.after(async()=>{await runtime.evaluate(({app})=>app.exit(0)).catch(()=>{});await runtime.close().catch(()=>{});});
+  const page=await runtime.firstWindow();
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.waitForSelector('.monaco-editor',{state:'attached',timeout:30000});
+  await page.waitForSelector('#start-screen',{state:'visible'});
+  await runtime.evaluate(({dialog},selected)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[selected]});},project);
+  await page.click('#open');await page.waitForFunction(()=>document.getElementById('tab-name')?.textContent==='artigo.cb');
+  assert.equal(await page.evaluate(()=>typeof window.require),'undefined');
+  await page.click('#compile');await page.waitForFunction(()=>document.getElementById('compile-status')?.textContent?.includes('PDF atualizado'),{},{timeout:180000});
+  await page.waitForSelector('.pdf-page canvas',{timeout:30000});assert.ok(await page.locator('.pdf-page canvas').count());
+  const editor=page.locator('.monaco-editor textarea').first();await editor.focus();await page.keyboard.press('Control+End');await page.keyboard.insertText('\nUma alteração ainda não salva.\n');
+  await page.waitForFunction(()=>document.getElementById('save-label')?.textContent==='Alterações não salvas');
+  assert.equal(await fs.readFile(file,'utf8'),original);
+  const editedWordCount=await page.locator('#word-count').innerText();
+  // A delayed save acknowledgement must not replace newer keystrokes.
+  await runtime.evaluate(({BrowserWindow},document)=>{BrowserWindow.getAllWindows()[0].webContents.send('studio:event',{type:'document',replaceText:false,document});},{path:file,text:original,savedText:original,dirty:false,project:[{name:'figuras',kind:'folder'},{name:'figuras/curva.png',kind:'png'},{name:'artigo.cb',kind:'cb'}]});
+  await page.waitForTimeout(100);
+  assert.equal(await page.locator('#save-label').innerText(),'Alterações não salvas');
+  assert.equal(await page.locator('#word-count').innerText(),editedWordCount);
+  await page.click('#compile');await page.waitForFunction(()=>document.getElementById('compile-status')?.textContent?.includes('PDF atualizado'),{},{timeout:180000});
+  assert.equal(await fs.readFile(file,'utf8'),original);
+  const exported=path.join(project,'artigo.pdf');await runtime.evaluate(({dialog},selected)=>{dialog.showSaveDialog=async()=>({canceled:false,filePath:selected});},exported);
+  await page.click('#export');await page.waitForFunction(()=>document.getElementById('toast')?.textContent==='PDF exportado.');assert.equal((await fs.readFile(exported)).subarray(0,5).toString(),'%PDF-');
+  await page.waitForFunction(()=>document.getElementById('toast')?.classList.contains('hidden'));await editor.focus();await page.keyboard.press('Control+Home');
+  await page.screenshot({path:path.join(root,'output/studio-preview.png'),fullPage:true,timeout:10000}).catch(error=>console.warn('Captura opcional indisponível em janela oculta: '+error.message));
+  await editor.focus();await page.keyboard.press('Control+End');await page.keyboard.insertText('\n$$\n\\input{secret}\n$$\n');
+  await page.click('#compile');await page.waitForFunction(()=>document.getElementById('compile-status')?.textContent==='Falha na compilação',{},{timeout:30000});
+  assert.match(await page.locator('#log-output').innerText(),/unsupported math command/);assert.ok(await page.locator('.pdf-page canvas').count());
+  await page.click('#save');await page.waitForFunction(()=>document.getElementById('save-label')?.textContent==='Salvo no computador');assert.match(await fs.readFile(file,'utf8'),/input\{secret\}/);
+  await editor.focus();await page.keyboard.press('Control+End');await page.keyboard.insertText('\nAlteração adicional.\n');
+  await fs.writeFile(file,'Texto alterado em outro aplicativo.');
+  await runtime.evaluate(({dialog})=>{dialog.showMessageBox=async()=>({response:2});});
+  await page.click('#save');await page.waitForTimeout(300);
+  assert.equal(await fs.readFile(file,'utf8'),'Texto alterado em outro aplicativo.');
+  assert.deepEqual(errors,[]);
+});

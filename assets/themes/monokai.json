@@ -1,0 +1,74 @@
+{
+  "id": "monokai",
+  "label": "Monokai",
+  "appearance": "dark",
+  "ui": {
+    "background": "#272822",
+    "foreground": "#f8f8f2",
+    "surface": "#22231e",
+    "surfaceAlt": "#33352c",
+    "raised": "#3e4036",
+    "border": "#494b40",
+    "muted": "#b3b5a7",
+    "accent": "#a6e22e",
+    "accentForeground": "#202116",
+    "header": "#1e1f1b",
+    "headerForeground": "#f8f8f2",
+    "preview": "#1c1d18"
+  },
+  "editor": {
+    "base": "vs-dark",
+    "inherit": true,
+    "rules": [
+      {
+        "token": "keyword",
+        "foreground": "F92672"
+      },
+      {
+        "token": "heading",
+        "foreground": "f8f8f2",
+        "fontStyle": "bold"
+      },
+      {
+        "token": "strong",
+        "foreground": "E6DB74",
+        "fontStyle": "bold"
+      },
+      {
+        "token": "emphasis",
+        "foreground": "f8f8f2",
+        "fontStyle": "italic"
+      },
+      {
+        "token": "number",
+        "foreground": "AE81FF"
+      },
+      {
+        "token": "type.identifier",
+        "foreground": "66D9EF"
+      },
+      {
+        "token": "function",
+        "foreground": "A6E22E"
+      },
+      {
+        "token": "code",
+        "foreground": "f8f8f2"
+      },
+      {
+        "token": "delimiter",
+        "foreground": "b3b5a7"
+      }
+    ],
+    "colors": {
+      "editor.background": "#272822",
+      "editor.foreground": "#f8f8f2",
+      "editorLineNumber.foreground": "#b3b5a7",
+      "editorLineNumber.activeForeground": "#f8f8f2",
+      "editorCursor.foreground": "#a6e22e",
+      "editor.selectionBackground": "#60609066",
+      "editor.lineHighlightBackground": "#ffffff09",
+      "editorOverviewRuler.border": "#272822"
+    }
+  }
+}

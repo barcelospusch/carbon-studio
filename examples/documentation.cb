@@ -1,0 +1,590 @@
+@title Documentação Oficial da Linguagem Carbon
+
+@type report
+
+
+
+@author Barcelos-Pusch, D.
+
+@author Santana, L. F.
+
+
+
+@date November 5th, 2026
+
+
+
+@toc[title="Conteúdo"]
+
+
+
+# Introdução
+
+
+
+O Carbon é uma linguagem de marcação moderna e minimalista desenvolvida para simplificar a criação de documentos acadêmicos e científicos, compilando marcações limpas diretamente para PDFs de qualidade tipo LaTeX.
+
+
+
+# 1. Inicialização do Documento
+
+
+
+Defina os metadados principais do trabalho no início do arquivo:
+
+
+
+@title Este é o Título do seu Documento
+
+
+
+# Escolha a estrutura do documento:
+
+@type article   # Título e metadados integrados na primeira página
+
+# OU
+
+@type report    # Gera uma capa dedicada para o título e metadados
+
+
+
+# Declaração de Autor(es)
+
+@author Barcelos-Pusch, D.
+
+@author Santana, L. F.
+
+
+
+# Declaração com Filiação/Instituição (Opcional)
+
+@author [Barcelos-Pusch, D.]{Nome da Instituição A}
+
+@author [Santana, L. F.]{Nome da Instituição B}
+
+
+
+# Data do Documento
+
+@date November $5^{\text{th}}$, 2026
+
+# OU data automática da compilação:
+
+@date @today
+
+
+
+
+
+# 2. Sumário Automático (Table of Contents)
+
+
+
+Para gerar automaticamente um sumário baseado nos cabeçalhos (#, ##, ###) do documento, insira a diretiva @toc ou @tableofcontents:
+
+
+
+# Sumário padrão com título automático
+
+@toc
+
+
+
+# Sumário com personalização do título exibido
+
+@toc[title="Índice Geral"]
+
+@toc[title="Conteúdo"]
+
+@toc[title="Table of Contents"]
+
+
+
+
+
+# 3. Estrutura de Seções e Texto
+
+
+
+## Cabeçalhos
+
+
+
+# Título Nível 1 (Capítulo / Seção Principal)
+
+## Título Nível 2 (Subseção)
+
+### Título Nível 3 (Sub-subseção)
+
+
+
+## Formatação Visual
+
+
+
+*itálico* ou _itálico_
+
+**negrito** ou __negrito__
+
+~~riscado~~
+
+[Texto do link](https://url-do-site.com)
+
+
+
+## Citações e Referências Cruzadas Internas
+
+
+
+... conforme visto na Figura @ref(fig:figura) ...
+
+... dados apresentados na Tabela @ref(table:tabela) ...
+
+
+
+# Referência automática (inclui o prefixo "Figura", "Tabela", etc.)
+
+... @autoref(fig:figura) ...
+
+
+
+# Referência à página
+
+... veja na página @pageref(table:tabela) ...
+
+
+
+
+
+# 4. Listas e Enumerações
+
+
+
+O Carbon suporta listas não ordenadas e diversos formatos de ordenação e numeração de forma automática:
+
+
+
+## Listas Não Ordenadas (Marcadores)
+
+
+
+- Item de lista com hífen
+
+* Item de lista com asterisco
+
+  - Subitem aninhado (use recuo/indentação)
+
+
+
+## Listas Numeradas (Ordenadas)
+
+
+
+1. Primeiro item
+
+2. Segundo item
+
+   1. Subitem numerado
+
+
+
+## Listas Alfabéticas e Romanas
+
+
+
+a. Primeira opção minúscula
+
+b. Segunda opção minúscula
+
+
+
+A. Primeira opção maiúscula
+
+B. Segunda opção maiúscula
+
+
+
+a) Opção com parêntese simples
+
+b) Outra opção
+
+
+
+A) Opção maiúscula com parêntese
+
+B) Outra opção
+
+
+
+i. Item em numeração romana minúscula (i, ii, iii...)
+
+I. Item em numeração romana maiúscula (I, II, III...)
+
+
+
+
+
+# 5. Imagens, Tabelas e Mídia
+
+
+
+## Tabelas
+
+
+
+Tabelas simples usam sintaxe em Markdown:
+
+
+
+| Parameter | Value |
+
+| --- | --- |
+
+| Date and Time | 2026-05-07 04:11:17.300 |
+
+| RA | 11 04 47.2817454 $\pm$ 1.797 mas |
+
+| DEC | 3 10 30.848615 $\pm$ 1.421 mas |
+
+
+
+Para adicionar legenda, chave de referência e dimensionamento:
+
+
+
+@caption Descrição detalhada da tabela. {#table:tabela width=100%}
+
+| Parameter | Value |
+
+| --- | --- |
+
+| Date and Time | 2026-05-07 04:11:17.300 |
+
+| RA | 11 04 47.2817454 $\pm$ 1.797 mas |
+
+
+
+## Imagens e Páginas de PDF
+
+
+
+# Imagens PNG, JPEG ou JPG
+
+![Descrição da figura.](figures/figura.png){#fig:figura width=75%}
+
+
+
+# Importação de página específica de PDF
+
+![Descrição do anexo.](figuras/arquivo.pdf){#fig:pagina-pdf width=75% page=2}
+
+
+
+* ![Legenda]: Texto descritivo da imagem (opcional).
+
+* (caminho): Caminho relativo do arquivo no projeto.
+
+* {#id width=75%}: Identificador para citação cruzada e porcentagem de largura.
+
+
+
+
+
+# 6. Diagramas Mermaid
+
+
+
+## Importando de Arquivo Externo (.mmd)
+
+
+
+1. Importe o arquivo contendo a biblioteca de esquemas no topo do documento:
+
+@import caminho/para/diagramas.mmd
+
+
+
+2. No local desejado, insira a chamada pela chave do diagrama:
+
+@mermaid #fig:sequencia width=80%
+
+
+
+
+
+# 7. Referências e Citações Bibliográficas
+
+
+
+O Carbon possui um sistema nativo para gerenciamento de citações sem a verborragia tradicional do BibTeX.
+
+
+
+## 1. Importando o Arquivo de Referências
+
+
+
+@import assets/referencias.cb
+
+
+
+## 2. Estrutura das Entradas (referencias.cb)
+
+
+
+@entry #barcelos2026 {
+
+  type: article,
+
+  author: "Barcelos, Dimitri; Silva, Dahiane",
+
+  title: "Caça a Asteroides via Análise Computacional",
+
+  journal: "Revista de Ciência Escolar",
+
+  year: 2026
+
+}
+
+
+
+@entry #sara_npca {
+
+  type: software,
+
+  author: "Barcelos, Dimitri",
+
+  title: "SARA-NPCA: Sistema de Registro de Asteroides",
+
+  url: "https://e-npca.vercel.app",
+
+  year: 2026
+
+}
+
+
+
+## 3. Citação no Texto
+
+
+
+Segundo a metodologia apresentada em @cite(barcelos2026), a análise de imagens permite a detecção precisa de candidatos.
+
+O processamento é realizado pela plataforma @cite(sara_npca).
+
+
+
+## 4. Compilação da Bibliografia
+
+
+
+Insira a diretiva no local desejado para gerar a lista de obras citadas:
+
+
+
+# Referências
+
+@print_bibliography[style=abnt]
+
+
+
+### Estilos Suportados (style)
+
+
+
+* abnt: Norma NBR 6023 (Padrão acadêmico brasileiro)
+
+* ieee: Citações numéricas em colchetes [1] (Engenharias e Tecnologia)
+
+* apa: Sistema Autor-Ano 7ª ed. (Ciências Sociais e Exatas)
+
+* mla: Modern Language Association 9ª ed. (Humanas e Literatura)
+
+* vancouver: Sequencial por ordem de citação (Áreas médicas)
+
+* chicago: Chicago Manual of Style Autor-Data
+
+
+
+
+
+# 8. Expressões Matemáticas e Símbolos
+
+
+
+O Carbon suporta renderização completa em LaTeX Math tanto inline quanto em bloco.
+
+
+
+## Expressões Inline e Bloco
+
+
+
+* Inline: $E = mc^2$ ou $x_i$
+
+* Bloco Simples:
+
+
+
+$$
+
+f(x) = \frac{\alpha x^2 + \beta}{\sqrt{1 + x^2}}
+
+$$
+
+
+
+* Bloco de Alinhamento:
+
+
+
+$$
+
+\begin{aligned}
+
+\nabla\cdot\mathbf{E} &= \frac{\rho}{\varepsilon_0} \\
+
+\nabla\cdot\mathbf{B} &= 0 \\
+
+\nabla\times\mathbf{E} &= -\frac{\partial\mathbf{B}}{\partial t}
+
+\end{aligned}
+
+$$
+
+
+
+## Símbolos e Operadores
+
+
+
+### Letras Gregas
+
+Minúsculas: \alpha, \beta, \gamma, \delta, \epsilon, \varepsilon, \zeta, \eta, \theta, \vartheta, \iota, \kappa, \lambda, \mu, \nu, \xi, \pi, \rho, \varrho, \sigma, \varsigma, \tau, \upsilon, \phi, \varphi, \chi, \psi, \omega
+
+Maiúsculas: \Gamma, \Delta, \Theta, \Lambda, \Xi, \Pi, \Sigma, \Upsilon, \Phi, \Psi, \Omega
+
+
+
+### Setas Matemáticas
+
+\leftarrow, \Leftarrow, \rightarrow, \Rightarrow, \leftrightarrow, \Leftrightarrow, \uparrow, \Uparrow, \downarrow, \Downarrow, \mapsto, \longmapsto, \nearrow, \searrow, \swarrow, \nwarrow
+
+
+
+### Símbolos Diversos
+
+\infty, \forall, \exists, \nexists, \nabla, \partial, \emptyset, \varnothing, \Re, \Im, \wp, \neg, \surd, \triangle, \square, \blacksquare
+
+
+
+### Operadores e Relações Binárias
+
+\times, \cdot, \div, \cap, \cup, \neq, \leq, \geq, \in, \notin, \subset, \perp, \approx, \simeq, \equiv, \cong, \wedge, \vee, \oplus, \otimes
+
+# 9. Layout, Posicionamento e Quebras de Página
+
+O Carbon permite controlar margens, papel, orientação, fonte, tamanho, entrelinha e posições dos elementos. Declare os blocos no cabeçalho. Exemplo literal:
+
+```carbon
+@margins {
+  top: 2.5cm,
+  bottom: 2.5cm,
+  left: 3cm,
+  right: 2cm
+}
+
+@page {
+  size: A4,              # A4, Letter, Legal ou A5
+  orientation: portrait  # portrait ou landscape
+}
+
+@typography {
+  font: "Liberation Sans",
+  fontsize: 12pt,
+  lineheight: 1.5
+}
+```
+
+As margens aceitam cm, mm ou in e precisam deixar área útil na página. O tamanho usa pt (1 a 200); a entrelinha é um fator maior que zero e até 10. Propriedades omitidas mantêm o padrão: margens de 1in, retrato, Latin Modern 12pt e entrelinha 1. O papel declarado no código prevalece sobre a preferência do Studio.
+
+Liberation Sans e outras fontes de sistema precisam estar instaladas no Windows. Latin Modern Roman, TeX Gyre Heros, TeX Gyre Termes e TeX Gyre Pagella usam fontes TeX. Uma família ausente gera erro; as equações mantêm sua fonte matemática.
+
+## Posicionamento
+
+```carbon
+![Diagrama](figures/sistema.png){#fig:sis width=80% pos=[here, top]}
+
+@caption Resultados obtidos. {#table:res width=100% pos=[top]}
+| Parâmetro | Medição |
+| --- | --- |
+| Fluxo | 99.4% |
+
+@mermaid #fig:sequencia width=80% pos=[page]
+```
+
+here ou h usa a posição fixa H e tem prioridade sobre as demais opções. top/t permite topo; bottom/b permite parte inferior; page/p permite página de elementos flutuantes. Um elemento fixo que não caiba no espaço restante passa à página seguinte.
+
+override ou ! flexibiliza as restrições do LaTeX; não fixa o elemento imediatamente. override, top produz !t; override sozinho produz !htbp. Sem pos, usa-se htbp. Os atributos também funcionam na abertura de blocos Mermaid.
+
+## Quebra manual
+
+```carbon
+Texto anterior.
+
+@newpage
+
+# Nova página
+Este conteúdo começa na página seguinte.
+```
+
+A diretiva gera newpage do LaTeX e não esvazia a fila de elementos flutuantes.
+
+## No Carbon Studio
+
+Use Layout do documento para gravar as configurações no código. Quebra de página insere a diretiva no cursor. Posicionar figura / tabela atualiza os atributos da linha selecionada. Ctrl+Z desfaz, Ctrl+S salva e Ctrl+Enter recompila. O exemplo examples/layout.cb é autocontido.
+
+
+# 10. Alinhamento e Formatação de Texto
+
+Os blocos de alinhamento controlam parágrafos sem alterar permanentemente o documento. O texto fora dos blocos continua justificado, como no LaTeX.
+
+```carbon
+@align(left)[
+Texto à esquerda.
+]
+
+@align(center)[
+Texto centralizado com **destaque** e matemática $E=mc^2$.
+]
+
+@align(right)[
+Texto à direita.
+]
+
+@align(justify)[
+Texto justificado entre as duas margens do bloco.
+]
+```
+
+Os aliases são l/L para left, c/C para center, r/R para right e j/J para justify. O fechamento usa ] em uma linha própria. Blocos aninhados, até 16 níveis, restauram o alinhamento anterior quando são fechados. Um parágrafo curto também pode ser escrito como @align(center)[conteúdo] em uma só linha.
+
+## Colunas e células
+
+Use --- ou :--- para esquerda (padrão), :---: para centro, ---: para direita e :---= para justificado. O alinhamento vale para o cabeçalho e para toda a coluna. A linha divisória não é impressa no PDF.
+
+```carbon
+@caption Tabela de alinhamentos. {#table:alinhamento width=100% pos=[here]}
+| Esquerda | Centro | Direita | Justificado |
+| :--- | :---: | ---: | :---= |
+| Item A | 100 | R$ 15,00 | Uma descrição longa com texto justificado dentro da célula. |
+| @align(right)[Item B] | 250 | R$ 120,50 | Outra descrição mantém a justificação da coluna. |
+```
+
+Uma diretiva inline deve envolver todo o conteúdo da célula. Ela tem prioridade sobre a coluna e mantém a largura e os alinhamentos das outras células. Cada célula aceita um envoltório; links e matemática inline continuam disponíveis.
+
+## No Studio
+
+O painel Alinhamento de texto aplica o modo escolhido a um bloco selecionado, à coluna da tabela no cursor ou somente à célula no cursor. Sem seleção, o modo de bloco usa a linha atual. A edição pode ser desfeita com Ctrl+Z; Ctrl+S salva e Ctrl+Enter recompila.
+
+Abra examples/alinhamento.cb para um exemplo completo.

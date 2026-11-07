@@ -1,0 +1,74 @@
+{
+  "id": "light-plus",
+  "label": "Light+",
+  "appearance": "light",
+  "ui": {
+    "background": "#ffffff",
+    "foreground": "#333333",
+    "surface": "#f3f3f3",
+    "surfaceAlt": "#e8e8e8",
+    "raised": "#ffffff",
+    "border": "#d4d4d4",
+    "muted": "#666666",
+    "accent": "#0066b8",
+    "accentForeground": "#ffffff",
+    "header": "#e8e8e8",
+    "headerForeground": "#333333",
+    "preview": "#e4e7eb"
+  },
+  "editor": {
+    "base": "vs",
+    "inherit": true,
+    "rules": [
+      {
+        "token": "keyword",
+        "foreground": "0000FF"
+      },
+      {
+        "token": "heading",
+        "foreground": "333333",
+        "fontStyle": "bold"
+      },
+      {
+        "token": "strong",
+        "foreground": "A31515",
+        "fontStyle": "bold"
+      },
+      {
+        "token": "emphasis",
+        "foreground": "333333",
+        "fontStyle": "italic"
+      },
+      {
+        "token": "number",
+        "foreground": "098658"
+      },
+      {
+        "token": "type.identifier",
+        "foreground": "267F99"
+      },
+      {
+        "token": "function",
+        "foreground": "795E26"
+      },
+      {
+        "token": "code",
+        "foreground": "333333"
+      },
+      {
+        "token": "delimiter",
+        "foreground": "666666"
+      }
+    ],
+    "colors": {
+      "editor.background": "#ffffff",
+      "editor.foreground": "#333333",
+      "editorLineNumber.foreground": "#666666",
+      "editorLineNumber.activeForeground": "#333333",
+      "editorCursor.foreground": "#0066b8",
+      "editor.selectionBackground": "#add6ff88",
+      "editor.lineHighlightBackground": "#00000006",
+      "editorOverviewRuler.border": "#ffffff"
+    }
+  }
+}

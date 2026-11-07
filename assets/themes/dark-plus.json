@@ -1,0 +1,74 @@
+{
+  "id": "dark-plus",
+  "label": "Dark+",
+  "appearance": "dark",
+  "ui": {
+    "background": "#1e1e1e",
+    "foreground": "#d4d4d4",
+    "surface": "#252526",
+    "surfaceAlt": "#2d2d30",
+    "raised": "#333337",
+    "border": "#454545",
+    "muted": "#a0a0a0",
+    "accent": "#007acc",
+    "accentForeground": "#ffffff",
+    "header": "#181818",
+    "headerForeground": "#eeeeee",
+    "preview": "#171717"
+  },
+  "editor": {
+    "base": "vs-dark",
+    "inherit": true,
+    "rules": [
+      {
+        "token": "keyword",
+        "foreground": "569CD6"
+      },
+      {
+        "token": "heading",
+        "foreground": "d4d4d4",
+        "fontStyle": "bold"
+      },
+      {
+        "token": "strong",
+        "foreground": "CE9178",
+        "fontStyle": "bold"
+      },
+      {
+        "token": "emphasis",
+        "foreground": "d4d4d4",
+        "fontStyle": "italic"
+      },
+      {
+        "token": "number",
+        "foreground": "B5CEA8"
+      },
+      {
+        "token": "type.identifier",
+        "foreground": "4EC9B0"
+      },
+      {
+        "token": "function",
+        "foreground": "DCDCAA"
+      },
+      {
+        "token": "code",
+        "foreground": "d4d4d4"
+      },
+      {
+        "token": "delimiter",
+        "foreground": "a0a0a0"
+      }
+    ],
+    "colors": {
+      "editor.background": "#1e1e1e",
+      "editor.foreground": "#d4d4d4",
+      "editorLineNumber.foreground": "#a0a0a0",
+      "editorLineNumber.activeForeground": "#d4d4d4",
+      "editorCursor.foreground": "#007acc",
+      "editor.selectionBackground": "#60609066",
+      "editor.lineHighlightBackground": "#ffffff09",
+      "editorOverviewRuler.border": "#1e1e1e"
+    }
+  }
+}

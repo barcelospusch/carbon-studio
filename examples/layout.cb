@@ -1,0 +1,37 @@
+@type article
+
+@margins {
+  top: 15mm,
+  bottom: 15mm,
+  left: 2cm,
+  right: 2cm
+}
+
+@page {
+  size: A5,
+  orientation: landscape
+}
+
+@typography {
+  font: "TeX Gyre Heros",
+  fontsize: 14pt,
+  lineheight: 1.5
+}
+
+# Controle de layout no Carbon
+Este documento usa papel A5 em paisagem, margens personalizadas, fonte sem serifa de 14pt e entrelinha 1.5.
+
+![Marca Carbon, mantida no local da declaração.](figures/logo.png){#fig:marca width=15% pos=[here]}
+
+@newpage
+
+# Uma nova página
+Este título inicia depois de uma quebra manual.
+
+@caption Resultados, mantidos próximos ao texto. {#table:medidas width=100% pos=[here]}
+| Parâmetro | Medição |
+| --- | --- |
+| Fluxo | 99.4% |
+| Energia | $E = mc^2$ |
+
+Consulte a @autoref(table:medidas).
