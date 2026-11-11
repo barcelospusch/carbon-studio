@@ -1,20 +1,28 @@
-# Carbon Markup Language (`.cb`) — Documentação Oficial
+# Carbon Markup Language (`.cb`)
 
-O **Carbon** é uma linguagem de marcação moderna e minimalista desenvolvida para simplificar a criação de documentos acadêmicos e científicos, compilando marcações limpas diretamente para PDFs de qualidade tipo LaTeX.
+Referência da linguagem Carbon do Carbon Studio 0.4.0. A fonte `.cb` é transformada em LaTeX e composta em PDF pelo Tectonic. O guia integrado do aplicativo usa este mesmo documento.
 
-## Sumário
-1. [Inicialização do Documento](#1-inicialização-do-documento)
-2. [Sumário Automático (Table of Contents)](#2-sumário-automático-table-of-contents)
-3. [Estrutura de Seções e Texto](#3-estrutura-de-seções-e-texto)
-4. [Listas e Enumerações](#4-listas-e-enumerações)
-5. [Imagens, Tabelas e Mídia](#5-imagens-tabelas-e-mídia)
-6. [Diagramas Mermaid](#6-diagramas-mermaid)
-7. [Referências e Citações Bibliográficas](#7-referências-e-citações-bibliográficas)
-8. [Expressões Matemáticas e Símbolos](#8-expressões-matemáticas-e-símbolos)
-9. [Layout, Posicionamento e Quebras de Página](#9-layout-posicionamento-e-quebras-de-página)
-10. [Alinhamento e Formatação de Texto](#10-alinhamento-e-formatação-de-texto)
+## Navegação
 
----
+- [1. Inicialização do Documento](#1-inicialização-do-documento)
+- [2. Sumário Automático (Table of Contents)](#2-sumário-automático-table-of-contents)
+- [3. Estrutura de Seções e Texto](#3-estrutura-de-seções-e-texto)
+- [4. Listas e Enumerações](#4-listas-e-enumerações)
+- [5. Imagens, Tabelas e Mídia](#5-imagens-tabelas-e-mídia)
+- [6. Diagramas Mermaid](#6-diagramas-mermaid)
+- [7. Referências e Citações Bibliográficas](#7-referências-e-citações-bibliográficas)
+- [8. Expressões Matemáticas e Símbolos](#8-expressões-matemáticas-e-símbolos)
+- [9. Layout, Posicionamento e Quebras de Página](#9-layout-posicionamento-e-quebras-de-página)
+- [10. Alinhamento e Formatação de Texto](#10-alinhamento-e-formatação-de-texto)
+- [11. Comentários e parágrafos](#11-comentários-e-parágrafos)
+- [12. Equações simplificadas](#12-equações-simplificadas)
+- [13. Colunas](#13-colunas)
+- [14. Legendas, fontes e subfiguras](#14-legendas-fontes-e-subfiguras)
+- [15. Estilos de links](#15-estilos-de-links)
+- [16. Blocos científicos e reutilização](#16-blocos-científicos-e-reutilização)
+- [17. Projetos modulares e diagnósticos](#17-projetos-modulares-e-diagnósticos)
+- [18. Studio e tipos de arquivo](#18-studio-e-tipos-de-arquivo)
+- [19. Currículos](#19-currículos)
 
 ## 1. Inicialização do Documento
 
@@ -23,22 +31,22 @@ Defina os metadados principais do trabalho no início do arquivo:
 ```carbon
 @title Este é o Título do seu Documento
 
-# Escolha a estrutura do documento:
+// Escolha a estrutura do documento:
 @type article   # Título e metadados integrados na primeira página
-# OU
+// OU
 @type report    # Gera uma capa dedicada para o título e metadados
 
-# Declaração de Autor(es)
+// Declaração de Autor(es)
 @author Barcelos-Pusch, D.
 @author Santana, L. F.
 
-# Declaração com Filiação/Instituição (Opcional)
+// Declaração com Filiação/Instituição (Opcional)
 @author [Barcelos-Pusch, D.]{Nome da Instituição A}
 @author [Santana, L. F.]{Nome da Instituição B}
 
-# Data do Documento
+// Data do Documento
 @date November $5^{\text{th}}$, 2026
-# OU data automática da compilação:
+// OU data automática da compilação:
 @date @today
 ```
 
@@ -49,10 +57,10 @@ Defina os metadados principais do trabalho no início do arquivo:
 Para gerar automaticamente um sumário baseado nos cabeçalhos (`#`, `##`, `###`) do documento, insira a diretiva `@toc` ou `@tableofcontents`:
 
 ```carbon
-# Sumário padrão com título automático
+// Sumário padrão com título automático
 @toc
 
-# Sumário com personalização do título exibido
+// Sumário com personalização do título exibido
 @toc[title="Índice Geral"]
 @toc[title="Conteúdo"]
 @toc[title="Table of Contents"]
@@ -82,10 +90,10 @@ Para gerar automaticamente um sumário baseado nos cabeçalhos (`#`, `##`, `###`
 ... conforme visto na Figura @ref(fig:figura) ...
 ... dados apresentados na Tabela @ref(table:tabela) ...
 
-# Referência automática (inclui o prefixo "Figura", "Tabela", etc.)
+// Referência automática (inclui o prefixo "Figura", "Tabela", etc.)
 ... @autoref(fig:figura) ...
 
-# Referência à página
+// Referência à página
 ... veja na página @pageref(table:tabela) ...
 ```
 
@@ -129,6 +137,13 @@ I. Item em numeração romana maiúscula (I, II, III...)
 
 ---
 
+
+### Listas de tarefas
+
+Use - [ ] para tarefas em aberto e - [X] para concluídas. Os marcadores são renderizados como caixas no PDF.
+
+---
+
 ## 5. Imagens, Tabelas e Mídia
 
 ### Tabelas
@@ -154,7 +169,7 @@ Para adicionar legenda, chave de referência e dimensionamento:
 
 ### Imagens e Páginas de PDF
 ```carbon
-# Imagens PNG, JPEG ou JPG
+// Imagens PNG, JPEG ou JPG
 ![Descrição da figura.](figures/figura.png){#fig:figura width=75%}
 
 # Importação de página específica de PDF
@@ -203,6 +218,23 @@ graph LR;
   D --> E;
 }
 ```
+
+---
+
+
+### Renderização integrada ao Studio
+
+Insira o bloco abaixo e compile pelo Studio.
+
+````carbon
+```mermaid
+flowchart LR
+  A[Escrever] --> B[Compilar]
+  B --> C[Exportar]
+```
+````
+
+As bibliotecas `.mmd` importadas com `@import` e as chamadas `@mermaid #fig:id` continuam disponíveis. O Studio desenha os diagramas em uma janela isolada do Chromium que já acompanha o Electron. O diagrama é convertido em PNG para inclusão no PDF. O renderizador bloqueia acesso externo e desabilita rótulos HTML na configuração padrão.
 
 ---
 
@@ -330,6 +362,32 @@ O Carbon suporta renderização completa em LaTeX Math tanto inline quanto em bl
 
 ---
 
+
+### Símbolos no Studio
+
+Use `$...$` em um parágrafo e `$$...$$` para fórmulas em destaque. A lista **Símbolos** da barra agrupa comandos LaTeX em gregas, setas, operadores, relações e miscelânea.
+
+### Matrizes
+
+Uma matriz inline usa `@matrix[delimitador]{células}` dentro de `$...$`. Separe colunas com vírgulas e linhas com ponto e vírgula.
+
+```carbon
+A identidade é $I = @matrix[parentheses]{1, 0; 0, 1}$.
+```
+
+Em bloco, use uma linha por linha da matriz e feche com `]`.
+
+```carbon
+@matrix[brackets][
+1, 2
+3, \frac{1}{2}
+]
+```
+
+Delimitadores disponíveis. `none`, `parentheses`, `brackets`, `braces`, `bars` e `double-bars`. Todas as linhas devem ter o mesmo número de células. Use ponto decimal, já que a vírgula separa colunas.
+
+---
+
 ## 9. Layout, Posicionamento e Quebras de Página
 
 ### Posicionamento de figuras, tabelas e diagramas
@@ -420,6 +478,33 @@ Exemplo autocontido: `studio-app/examples/layout.cb`.
 
 ---
 
+
+### Cabeçalhos e rodapés por página
+
+Cada regra define uma área, um conjunto de páginas e uma posição. Use `@header[escopo][posição] Texto` ou `@footer[escopo][posição] Texto` em uma linha própria.
+
+```carbon
+@header[all][left] Notas de pesquisa
+@header[first][left] Apresentação
+@header[even][right] Verso
+@header[2][left] Demonstração
+@footer[all][right] Página {page} de {pages}
+```
+
+As posições são `left`, `center` e `right`. Os escopos são `all`, `first`, `odd`, `even` e um número de página. Para a mesma área e posição, um número específico tem prioridade sobre a primeira página, a paridade e a regra geral. A última declaração ganha quando repete o mesmo escopo e posição. Use `none` como texto para deixar um campo vazio.
+
+| Texto da regra | Exemplo no PDF |
+| --- | --- |
+| `Página {page}` | Página 2 |
+| `Página {page} de {pages}` | Página 2 de 5 |
+| `{page}` | 2 |
+| `{page} de {pages}` | 2 de 5 |
+| `{page}/{pages}` | 2/5 |
+
+O Studio usa referências LaTeX para o total de páginas. A compilação resolve o total e as referências automaticamente.
+
+---
+
 ## 10. Alinhamento e Formatação de Texto
 
 ### Blocos de texto
@@ -505,14 +590,389 @@ As alterações são feitas no código, podem ser desfeitas/refeitas e precisam 
 
 Exemplo autocontido: `studio-app/examples/alinhamento.cb`.
 
+---
+
+## 11. Comentários e parágrafos
+
+`#`, `##` e `###` continuam sendo títulos. Use `//` para um comentário de linha ou `/* ... */` para comentários multilinha. Comentários são substituídos por espaços antes do parsing; as linhas e colunas de diagnóstico permanecem estáveis. URLs `https://...`, strings entre aspas, código entre crases e blocos de código preservam seus caracteres. Para um comentário após texto, separe `//` por espaço. Os atalhos do Monaco para comentar linha (Ctrl+/) e bloco (Shift+Alt+A) funcionam no editor Carbon.
+
+```carbon
+// Este texto não aparece no PDF.
+/* Comentário
+   com duas linhas. */
+@paragraph {
+  indent-first: 1.25cm,
+  indent-after-heading: false,
+  spacing-before: 0pt,
+  spacing-after: 6pt
+}
+
+# Introdução
+Texto com **negrito**, *itálico* e $E=mc^2$.
+
+@paragraph[indent=0pt][
+Este parágrafo não tem recuo, mantendo **formatação inline**.
+]
+```
+
+| Propriedade global | Valores | Padrão |
+| --- | --- | --- |
+| `indent-first` | Dimensão não negativa em cm, mm, pt ou in | 15pt |
+| `indent-after-heading` | true ou false | false |
+| `spacing-before` | Dimensão não negativa | 0pt |
+| `spacing-after` | Dimensão não negativa | 0pt |
+
+Um bloco global por documento completo. O painel **Layout do documento** lê e grava essas propriedades. O recuo local exige `indent=...`, abertura `[` e fechamento `]` em linha própria; seu conteúdo é um parágrafo com formatação inline, sem diretivas estruturais aninhadas. O espaçamento global também se aplica a ele. Espaços verticais podem ser descartados pelo LaTeX no início de uma página.
 
 ---
 
-## Listas de tarefas
+## 12. Equações simplificadas
 
-Use - [ ] para tarefas em aberto e - [X] para concluídas. Os marcadores são renderizados como caixas no PDF.
+`@equation[...][` permanece compatível. `@eq[` aceita uma ou mais linhas, insere o ambiente matemático e alinha pelo primeiro sinal `=` fora de grupos TeX. Cada linha não vazia torna-se uma linha matemática. Não adicione `\\` no fim de cada linha.
 
-## Currículos
+```carbon
+@eq[label=eq:energia number=auto][
+E = mc^2
+]
+
+@eq[align=equals number=none][
+a+b=c
+c=d
+]
+
+@equations[label=eq:sistema number=7][
+x+y=10
+x-y=2
+]
+Veja @eqref(eq:energia) e @eqref(eq:sistema).
+```
+
+| Opção | Valores | Padrão |
+| --- | --- | --- |
+| `align` | equals, center, left, right | equals |
+| `label` | Identificador com letras, números, ponto, hífen ou dois-pontos | Ausente |
+| `number` | auto, none ou inteiro não negativo | Sem número; com label, automático |
+
+`@equations` insere uma chave de sistema à esquerda e aceita `equals` ou `center`. Não combine `number=none` com `label`: não haveria número válido para a referência. `@eqref` usa parênteses; `@ref`, `@autoref` e `@pageref` preservam seus comportamentos. Fórmulas `$...$`, `$$...$$` e matrizes antigas continuam disponíveis. Comandos de entrada, saída e execução TeX permanecem proibidos na matemática.
+
+
+### Sintaxe anterior: @equation
+
+```carbon
+@equation[align=equals label=eq:energia number=1][
+E = mc^2
+m = \frac{E}{c^2}
+]
+
+Veja a equação @eqref(eq:energia).
+```
+
+- `align=equals` alinha no primeiro sinal de igualdade fora de grupos LaTeX. É o padrão.
+- `align=left`, `align=right` e `align=center` posicionam as linhas na área de texto.
+- `number=auto` usa o contador do LaTeX. Um inteiro define o número exibido entre parênteses.
+- `label=eq:nome` cria uma referência. Com label e sem number, a numeração é automática.
+
+Use `@eqref(eq:nome)` para obter o número entre parênteses.
+
+---
+
+## 13. Colunas
+
+```carbon
+@columns {
+  count: 2,
+  gap: 0.8cm,
+  divider: true,
+  divider-width: 0.4pt,
+  divider-color: "#666666",
+  divider-style: solid,
+  divider-padding: 0.25cm,
+  balance: true
+}
+
+# Texto em colunas
+Primeira coluna.
+@columnbreak
+Coluna seguinte.
+```
+
+Para limitar as colunas a um trecho, use a forma local, sem um bloco global `@columns`:
+
+```carbon
+@columns[count=2 gap=1cm divider=true balance=false][
+Texto, **formatação**, listas e matemática.
+
+- Primeiro item.
+- Segundo item.
+
+@columnbreak
+@eq[number=none][
+x=1
+]
+]
+```
+
+| Propriedade | Valores | Padrão |
+| --- | --- | --- |
+| count | Inteiro de 2 a 10, capacidade do pacote multicol | 2 |
+| gap | Dimensão cm/mm/pt/in | 0.8cm |
+| divider | true/false | false |
+| divider-width | Dimensão | 0.4pt |
+| divider-color | Cor hexadecimal #RRGGBB entre aspas | #666666 |
+| divider-style | solid, dashed, dotted | solid |
+| divider-padding | Dimensão adicionada de cada lado da divisória | 0cm |
+| balance | true/false | true |
+
+O espaço total entre colunas é `gap + 2 × divider-padding`. `balance=true` distribui o conteúdo ao final do ambiente; `false` mantém o preenchimento sequencial. O mecanismo `multicol` controla a continuação nas páginas seguintes. Imagens e tabelas dentro de colunas usam posicionamento fixo `[H]`, sem flutuar para fora do trecho. Elementos maiores que a área útil continuam sujeitos às restrições físicas do papel. Não aninhe colunas locais, nem combine colunas locais com globais. `@columnbreak` fora de colunas é um erro. O painel **Colunas e links** configura colunas globais.
+
+---
+
+## 14. Legendas, fontes e subfiguras
+
+Nas figuras, **o texto é sempre o conteúdo de `![texto](arquivo)`**. `@caption[...]` configura sua apresentação. A forma antiga `@caption Texto` continua compatível, inclusive como legenda de tabelas e fallback para imagens de legenda vazia.
+
+```carbon
+@caption[position=right align=left width=30% gap=0.5cm font=small style=italic]
+@source Adaptado de @cite(autor2026).
+@note Incerteza de $1\sigma$.
+![Resultados experimentais.](figures/results.png){#fig:results width=70%}
+```
+
+| Opção | Valores | Padrão de figuras |
+| --- | --- | --- |
+| position | top, bottom, left, right, overlay-top, overlay-bottom | bottom |
+| align | left, right, center, justify | center |
+| width | Porcentagem maior que 0 e menor que 100; área da legenda lateral | 30% |
+| gap | Dimensão cm/mm/pt/in | 0.5cm |
+| font | tiny, scriptsize, footnotesize, small, normalsize, large | small |
+| style | normal, bold, italic | normal |
+
+Legendas laterais repartem a largura útil após descontar `gap`, evitando somar 70% + 30% + um espaço extra. Nas outras posições, a largura da imagem continua no atributo da imagem. Sobreposições não adicionam uma segunda área de legenda fora da imagem. Fontes e notas ficam abaixo do conjunto, com formatação inline, matemática e citações.
+
+Uma configuração pode ser seguida por linhas vazias, `@source` e `@note`, mas se aplica somente ao próximo elemento de mídia ou tabela. Um parágrafo ou título intermediário encerra essa associação. Após o elemento, a configuração é descartada. Uma figura ausente não gera legenda, fonte, nota nem placeholder.
+
+Tabelas preservam a legenda textual e aceitam as opções:
+
+```carbon
+@caption[position=bottom align=left font=footnotesize] Resultados.
+@source Laboratório.
+@note Valores em metros.
+| Medida | Valor |
+| --- | ---: |
+| Distância | 10 |
+```
+
+A posição padrão da legenda de tabela continua sendo o topo. Atributos antigos `{#table:id width=100% pos=[here]}` na forma tradicional continuam funcionando.
+
+### Subfiguras
+
+```carbon
+@figure[group=horizontal gap=0.5cm label=fig:grupo][
+@subfigure[label=fig:a width=50%][
+@caption[position=bottom align=center]
+![Resultado experimental.](figures/a.png)
+]
+@subfigure[label=fig:b width=50%][
+![Resultado simulado.](figures/b.png)
+]
+@group-caption Comparação entre resultados.
+]
+Veja @autoref(fig:grupo), @ref(fig:a), @ref(fig:b) e @pageref(fig:a).
+```
+
+`group` é obrigatório: horizontal ou vertical. `gap` é opcional (0.5cm); `label` identifica o grupo. Cada `@subfigure` aceita `label` e `width` (50% por padrão). O espaço entre subfiguras horizontais é descontado antes da distribuição percentual. Mantenha a soma das larguras em até 100%; em organização vertical, use `width=100%` para ocupar a largura toda. A numeração referenciada é 1(a), 1(b). A legenda geral tem contador independente das letras, compartilhando o número da figura. Grupos não podem ser aninhados e seguem a paginação de uma figura flutuante; um grupo completo deve caber em uma página.
+
+---
+
+## 15. Estilos de links
+
+```carbon
+@links {
+  color: "#2563EB",
+  underline: true,
+  underline-color: "#2563EB",
+  underline-style: solid,
+  weight: normal,
+  italic: false,
+  border: false,
+  breakable: true
+}
+@links[internal][
+  color: "#333333",
+  underline: false
+]
+
+[Site do Carbon](https://github.com/barcelospusch/carbon-studio)
+```
+
+`@links { ... }` define a base; `@links[external][ ... ]` e `@links[internal][ ... ]` a complementam por categoria, independentemente da ordem das diretivas. Uma configuração por categoria. Links externos são Markdown HTTP/HTTPS. Internos incluem `@ref`, `@autoref`, `@pageref` e `@eqref`.
+
+| Propriedade | Valores | Padrão quando @links é utilizado |
+| --- | --- | --- |
+| color | #RRGGBB entre aspas | #2563EB |
+| underline | true/false | false |
+| underline-color | #RRGGBB | #2563EB |
+| underline-style | solid, dashed, dotted | solid |
+| weight | normal, bold | normal |
+| italic | true/false | false |
+| border | true/false | false |
+| breakable | true/false | true |
+
+Sem `@links`, a aparência anterior do documento é preservada. `breakable=true` permite quebras nos pontos aceitos pelo TeX e pelo pacote xurl; não garante divisão em qualquer caractere de um rótulo indivisível. Bordas usam uma caixa e, por isso, um link com borda é indivisível. O painel **Colunas e links** oferece seletores de cor, opções de sublinhado, peso e uma amostra visual; ele grava a configuração no arquivo Carbon.
+
+---
+
+## 16. Blocos científicos e reutilização
+
+### Resumo, teoremas e blocos semânticos
+
+```carbon
+@abstract[
+Este artigo estuda um sistema físico.
+]
+@keywords física, medição, ciência
+
+@theorem[label=th:identidade title="Identidade"][
+Para todo $x$, vale $x=x$.
+]
+@proof[
+Pela propriedade reflexiva.
+]
+@definition[label=def:medida][
+Uma medida atribui um valor a uma grandeza.
+]
+@warning[title="Atenção às unidades"][
+Use unidades consistentes.
+]
+@note[
+As incertezas são experimentais.
+]
+```
+
+`@abstract`, `@theorem`, `@proof`, `@definition`, `@warning` e `@note` aceitam um bloco multilinha, fechado por `]` em linha própria. `label` e `title` são opcionais nos teoremas e definições. Demonstrações, avisos e notas aceitam `title`; em avisos/notas ele substitui o cabeçalho. Resumos e `@keep` não recebem opções. Demonstrações usam o ambiente amsthm e sua marca final. Teoremas e definições têm contadores próprios. Avisos e notas usam blocos recuados com cabeçalho. A forma `@note Texto` pertence à próxima figura/tabela; `@note[` cria um bloco de conteúdo.
+
+`@refs(fig:a,fig:b)` agrupa referências; `@cites(autor2026,outro2025)` agrupa citações e usa o mesmo estilo bibliográfico de `@cite`. As entradas são as mesmas `@entry` já documentadas.
+
+### Numeração e paginação
+
+```carbon
+@numbering[section=Roman figure=arabic table=arabic equation=arabic]
+@setcounter[figure=4]
+@keep-with-next
+# Próxima figura começa em 5
+
+@keep[
+Parágrafos que devem permanecer juntos quando couberem na página.
+]
+@pagebreak
+@nopagebreak
+@clearpage
+```
+
+`@numbering` aceita section, subsection, figure, table e equation, com arabic, roman, Roman, alph ou Alph. A alteração vale a partir de sua posição no documento. `@setcounter[nome=inteiro]` aceita chapter (em report), section, subsection, figure, table, equation, page, theorem e definition. Contadores alfabéticos precisam permanecer no intervalo representável pelo LaTeX.
+
+`@keep` usa `samepage` e não torna possível encaixar conteúdo maior que uma página. `@keep-with-next` reserva quatro linhas antes do próximo elemento. `@pagebreak` solicita quebra, `@nopagebreak` desaconselha a quebra naquele ponto, `@clearpage` descarrega também elementos flutuantes. `@newpage` mantém seu comportamento anterior.
+
+```carbon
+@page[size=A5 orientation=landscape][
+# Trecho em paisagem
+Conteúdo em papel A5.
+]
+# Retorno ao papel global
+```
+
+O trecho começa e termina em páginas separadas. `size` aceita A4, A5, Letter ou Legal; `orientation` aceita portrait ou landscape. Ambos herdam o layout global quando omitidos. As margens são mantidas e validadas. Não use a forma local dentro de outro bloco nem com colunas globais; use colunas locais dentro de cada trecho de página.
+
+### Código com legenda
+
+```carbon
+@code[language=javascript caption="Uma operação" label=code:operacao][
+const value = 2;
+// Este comentário pertence ao código e aparece no PDF.
+console.log(value);
+]
+```
+
+`language` é opcional (`text` por padrão): javascript, typescript, python, c, cpp, java, bash, sql e latex. TypeScript usa as palavras-chave JavaScript. `caption` e `label` são opcionais. O ambiente listings faz o realce, sem executar o conteúdo. Código com caracteres Unicode fora dos alfabetos suportados por listings pode exigir a forma antiga com crases e verbatim. `]` sozinho fecha o bloco; para código que contenha essa linha, use o bloco com três crases. O token reservado `\end{lstlisting}` é rejeitado no conteúdo.
+
+### Variáveis e estilos
+
+```carbon
+@let projeto = **Carbon Studio**
+@let mensagem = Produzido com @var(projeto).
+@style destaque {align: left, font: small, weight: bold, italic: true, indent: 0pt}
+
+@var(mensagem)
+@style[destaque][
+Um bloco de destaque com $E=mc^2$.
+]
+```
+
+`@let nome = valor` define texto reutilizável a partir desse ponto; `@var(nome)` o insere com formatação inline. Nomes aceitam letras, números, sublinhado, ponto e hífen. Referências indefinidas e ciclos entre variáveis são erros. A expansão não cria diretivas estruturais.
+
+`@style nome { ... }` define um estilo global reutilizável, aplicado com `@style[nome][ ... ]`. As propriedades são `align` (left/right/center/justify; padrão justify), `font` (tiny/scriptsize/footnotesize/small/normalsize/large/Large; padrão normalsize), `weight` (normal/bold; normal), `italic` (true/false; false), `indent` (dimensão; 0pt). O escopo termina no `]`; estilos não alteram texto posterior.
+
+### Idioma e hifenização
+
+```carbon
+@language pt-BR
+```
+
+Idiomas: pt-BR, pt-PT, en, es, fr e de. Uma declaração global seleciona o Babel e seus padrões de hifenização, além de nomes de figuras, tabelas, resumo, teoremas, definições, demonstrações e palavras-chave. Sem a declaração, mantém-se a configuração anterior do projeto. A localização de textos livres inseridos pelo autor, como títulos de cabeçalho, continua sob seu controle.
+
+---
+
+## 17. Projetos modulares e diagnósticos
+
+```carbon
+@title Documento científico
+@type report
+@import referencias.cb
+@include capitulos/01-introducao.cb
+@include capitulos/02-metodologia.cb
+```
+
+- `@include caminho.cb` insere conteúdo estrutural na posição da diretiva. Caminhos são relativos ao arquivo que contém a inclusão, inclusive nas inclusões aninhadas.
+- `@import caminho` carrega bibliografias Carbon, configurações ou bibliotecas Mermaid. Para compatibilidade, importações antigas de `.cb` que contenham texto continuam sendo expandidas; prefira `@include` para capítulos novos.
+- Use aspas para caminhos com espaços. Recursos e capítulos precisam permanecer dentro da pasta de projeto aberta; links simbólicos que escapem da pasta são rejeitados.
+- A ordem das inclusões define a ordem dos capítulos. Labels e bibliografia são compartilhados pelo documento completo. Imagens usam a pasta do capítulo que as referencia.
+- Ciclos, arquivos ausentes, bibliotecas Mermaid inválidas e falhas recuperáveis de imagens/diagramas geram **warning**, omitindo o elemento e mantendo o conteúdo válido. Não se insere uma imagem de erro.
+- Erros estruturais e matemática inválida continuam **error** e podem impedir a geração. A prévia válida anterior é mantida.
+- Diagnósticos carregam arquivo e linha originais; a margem do editor mostra ícones e detalhes. Na saída, clique no diagnóstico para abrir seu arquivo e ir à linha. O mapa das linhas LaTeX geradas também permite localizar erros do motor quando ele informa a linha.
+- Ao abrir um capítulo, o Studio procura um documento raiz que o inclua. Se houver vários, prefere `main.cb`; se não houver uma raiz única nem esse nome, usa o arquivo aberto. Para projetos com várias publicações compartilhando capítulos, abra explicitamente o arquivo principal desejado.
+- Depois de uma compilação bem-sucedida, dependências são monitoradas por data/tamanho; mudanças disparam nova compilação. Isso inclui recursos antes ausentes que tenham sido referenciados.
+- Não existe mais a rejeição artificial de fontes de 8 MiB. A transpilação no aplicativo ocorre em worker; cancelamento encerra o worker e o processo TeX. Memória, disco, limites reais do TeX e o tempo de execução configurado ainda se aplicam.
+
+Um exemplo científico combinado está em `examples/novos-recursos.cb`. Ele utiliza a imagem `examples/figures/logo.png` já presente no repositório. Para um projeto modular pronto, veja `examples/modular/main.cb`.
+
+---
+
+## 18. Studio e tipos de arquivo
+
+| Tipo | Abertura |
+| --- | --- |
+| .cb | Monaco Carbon e compilação automática após a leitura |
+| .md, .markdown | Edição Markdown e prévia independente do Carbon, com debounce de 250 ms |
+| .mmd | Editor de texto e prévia Mermaid |
+| .pdf | PDF.js com páginas, zoom, ajuste à largura/página e retorno ao documento |
+| .png, .jpg, .jpeg | Visualizador de imagens existente |
+| Demais arquivos | Botão de pasta visível por hover ou foco para revelar o arquivo no sistema |
+
+Markdown suporta títulos, texto, ênfase, tachado, links HTTP/HTTPS, imagens locais permitidas, listas, checklists, tabelas, citações e código com realce das linguagens registradas. Mermaid usa o modo estrito. HTML é sanitizado com DOMPurify; scripts, formulários, objetos e frames são removidos. Imagens remotas não são carregadas automaticamente. Fórmulas `$...$` e `$$...$$` são renderizadas com KaTeX em modo não confiável, fora dos blocos de código; comandos de HTML, execução e carregamento de recursos não são habilitados.
+
+Os controles superiores selecionam editor, prévia, divisão vertical ou horizontal. A separação é redimensionável e o Monaco permanece montado, preservando cursor e scroll ao trocar layouts. Modo, proporção, largura e visibilidade da barra lateral são persistidos localmente. O botão de pasta superior oculta/exibe a barra; ao reabrir, a largura anterior é restaurada. Os controles usam os SVGs `view-editor`, `view-preview`, `split-horizontal` e `split-vertical` de `assets/icons`. A associação fica centralizada em `src/workspace-view.ts`, sem alterar a lógica dos botões.
+
+PDFs abertos pela árvore não entram no estado de exportação do compilador. O botão **Voltar ao documento** restaura o editor e a prévia compilada anterior, preservando alterações não salvas. Exportar um PDF compilado continua exigindo a escolha explícita do destino no diálogo do sistema.
+
+### Arquivos e importação de imagens no Studio
+
+Abra uma pasta para usar os controles sobre a árvore de arquivos. Escolha a pasta principal ou uma subpasta ao criar um diretório, criar um documento `.cb` ou copiar um item do computador. O Studio mantém os arquivos com nomes já existentes.
+
+Para importar uma imagem, informe uma URL HTTP ou HTTPS, carregue a prévia e escolha o destino e o nome. O Studio aceita PNG e JPEG de até 12 MiB e usa a extensão do formato recebido. Depois, referencie o arquivo com `![Legenda](figuras/nome.png)`. O caminho é relativo ao documento que contém a figura.
+
+---
+
+## 19. Currículos
 
 Use o botão **Currículo** da tela inicial ou declare `@type cv` antes dos campos do currículo. Informe o nome em `@title`, a área de atuação em `@headline` e cada meio de contato em um `@contact`. Os títulos de seção usam a mesma sintaxe do Carbon e aparecem sem numeração no PDF.
 
@@ -535,94 +995,3 @@ Use o botão **Currículo** da tela inicial ou declare `@type cv` antes dos camp
 `@cv-entry[período][local] Título | Organização` alinha período e local à direita. Os campos entre colchetes podem ficar vazios. O template usa o autor padrão como nome e a instituição padrão como contato.
 
 O formato usa a organização por contatos, seções e entradas datadas do [RenderCV](https://github.com/rendercv/rendercv) como referência. A fonte é Carbon e a saída é composta pelo Tectonic.
-
----
-
-## Matemática
-
-Use `$...$` em um parágrafo e `$$...$$` para fórmulas em destaque. A lista **Símbolos** da barra agrupa comandos LaTeX em gregas, setas, operadores, relações e miscelânea.
-
-## Matrizes
-
-Uma matriz inline usa `@matrix[delimitador]{células}` dentro de `$...$`. Separe colunas com vírgulas e linhas com ponto e vírgula.
-
-```carbon
-A identidade é $I = @matrix[parentheses]{1, 0; 0, 1}$.
-```
-
-Em bloco, use uma linha por linha da matriz e feche com `]`.
-
-```carbon
-@matrix[brackets][
-1, 2
-3, \frac{1}{2}
-]
-```
-
-Delimitadores disponíveis. `none`, `parentheses`, `brackets`, `braces`, `bars` e `double-bars`. Todas as linhas devem ter o mesmo número de células. Use ponto decimal, já que a vírgula separa colunas.
-
-## Equações alinhadas e referências
-
-```carbon
-@equation[align=equals label=eq:energia number=1][
-E = mc^2
-m = \frac{E}{c^2}
-]
-
-Veja a equação @eqref(eq:energia).
-```
-
-- `align=equals` alinha no primeiro sinal de igualdade fora de grupos LaTeX. É o padrão.
-- `align=left`, `align=right` e `align=center` posicionam as linhas na área de texto.
-- `number=auto` usa o contador do LaTeX. Um inteiro define o número exibido entre parênteses.
-- `label=eq:nome` cria uma referência. Com label e sem number, a numeração é automática.
-
-Use `@eqref(eq:nome)` para obter o número entre parênteses.
-
----
-
-## Cabeçalhos, rodapés e paginação
-
-Cada regra define uma área, um conjunto de páginas e uma posição. Use `@header[escopo][posição] Texto` ou `@footer[escopo][posição] Texto` em uma linha própria.
-
-```carbon
-@header[all][left] Notas de pesquisa
-@header[first][left] Apresentação
-@header[even][right] Verso
-@header[2][left] Demonstração
-@footer[all][right] Página {page} de {pages}
-```
-
-As posições são `left`, `center` e `right`. Os escopos são `all`, `first`, `odd`, `even` e um número de página. Para a mesma área e posição, um número específico tem prioridade sobre a primeira página, a paridade e a regra geral. A última declaração ganha quando repete o mesmo escopo e posição. Use `none` como texto para deixar um campo vazio.
-
-| Texto da regra | Exemplo no PDF |
-| --- | --- |
-| `Página {page}` | Página 2 |
-| `Página {page} de {pages}` | Página 2 de 5 |
-| `{page}` | 2 |
-| `{page} de {pages}` | 2 de 5 |
-| `{page}/{pages}` | 2/5 |
-
-O Studio usa referências LaTeX para o total de páginas. A compilação resolve o total e as referências automaticamente.
-
----
-
-## Projetos, arquivos e Mermaid
-
-Abra uma pasta para usar os controles sobre a árvore de arquivos. Escolha a pasta principal ou uma subpasta ao criar um diretório, criar um documento `.cb` ou copiar um item do computador. O Studio mantém os arquivos com nomes já existentes.
-
-Para importar uma imagem, informe uma URL HTTP ou HTTPS, carregue a prévia e escolha o destino e o nome. O Studio aceita PNG e JPEG de até 12 MiB e usa a extensão do formato recebido. Depois, referencie o arquivo com `![Legenda](figuras/nome.png)`. O caminho é relativo ao documento que contém a figura.
-
-## Mermaid integrado
-
-Insira o bloco abaixo e compile pelo Studio.
-
-````carbon
-```mermaid
-flowchart LR
-  A[Escrever] --> B[Compilar]
-  B --> C[Exportar]
-```
-````
-
-As bibliotecas `.mmd` importadas com `@import` e as chamadas `@mermaid #fig:id` continuam disponíveis. O Studio desenha os diagramas em uma janela isolada do Chromium que já acompanha o Electron. O diagrama é convertido em PNG para inclusão no PDF. O renderizador bloqueia acesso externo e desabilita rótulos HTML na configuração padrão.

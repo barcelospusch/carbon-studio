@@ -5,3 +5,5 @@
 - [Matemática](Matematica)
 - [Paginação](Paginacao)
 - [Linguagem](Linguagem)
+
+- [Recursos científicos e espaço de trabalho](Novos-recursos)

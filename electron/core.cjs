@@ -3,19 +3,18 @@ const { promises: fs } = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { spawn } = require('node:child_process');
-const MAX_SOURCE_BYTES = 8 * 1024 * 1024;
 const hash = value => crypto.createHash('sha256').update(value).digest('hex');
 function validateSource(source) {
-  if (typeof source !== 'string' || Buffer.byteLength(source) > MAX_SOURCE_BYTES) throw new Error('O documento deve ser texto UTF-8 de até 8 MiB.');
+  if (typeof source !== 'string') throw new Error('O documento deve ser texto UTF-8.');
   return source;
 }
 async function readDocument(file) {
-  if (path.extname(file).toLowerCase() !== '.cb') throw new Error('Selecione um documento .cb.');
+  if (!['.cb','.md','.markdown','.mmd'].includes(path.extname(file).toLowerCase())) throw new Error('Selecione um documento de texto suportado.');
   const stat = await fs.stat(file);
-  if (!stat.isFile() || stat.size > MAX_SOURCE_BYTES) throw new Error('Documento inválido ou maior que 8 MiB.');
+  if (!stat.isFile()) throw new Error('Documento inválido.');
   const bytes = await fs.readFile(file);
   const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/^\uFEFF/, '');
-  return { path: path.resolve(file), text, fingerprint: hash(bytes) };
+  return { path: await fs.realpath(file), text, fingerprint: hash(bytes) };
 }
 async function fingerprint(file) { try { return hash(await fs.readFile(file)); } catch (e) { if (e.code === 'ENOENT') return null; throw e; } }
 async function atomicWrite(file, data) {
@@ -72,4 +71,4 @@ function runCompiler(executable, args, { cwd, timeout = 180000, node, signal, on
     child.on('error', error => finish(error)); child.on('close', code => finish(null, code));
   });
 }
-module.exports = { MAX_SOURCE_BYTES, hash, validateSource, readDocument, fingerprint, atomicWrite, compileArguments, runCompiler };
+module.exports = { hash, validateSource, readDocument, fingerprint, atomicWrite, compileArguments, runCompiler };

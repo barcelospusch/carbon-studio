@@ -8,5 +8,6 @@ O Carbon Studio é um editor para Windows que compila arquivos `.cb` em LaTeX e 
 - [Matemática](Matematica)
 - [Cabeçalhos e paginação](Paginacao)
 - [Linguagem Carbon](Linguagem)
+- [Recursos científicos e espaço de trabalho](Novos-recursos)
 
 As páginas desta pasta podem ser copiadas para o repositório Git da Wiki do GitHub, com `Home.md` como página inicial e `_Sidebar.md` como navegação lateral.

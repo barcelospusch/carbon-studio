@@ -1,5 +1,7 @@
 # Revisão visual e alterações aguardando SVGs
 
+> Registro histórico. O estado atual de distribuição e os comandos estão em [Publicação](../PUBLISHING.md); a referência vigente está em [LANGUAGE.md](../../LANGUAGE.md).
+
 ## Ícones encontrados
 
 - 22 entradas SVG originais no registro de src/icons.ts; cinco não têm chamada direta na interface atual (stop, chevron, chevronDown, check, alert).

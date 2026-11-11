@@ -10,6 +10,7 @@ for(const document of [{name:'layout.cb',pages:2,landscape:true},{name:'alinhame
  t.after(async()=>{await runtime.evaluate(({app})=>app.exit(0)).catch(()=>{});await runtime.close().catch(()=>{});});
  const page=await runtime.firstWindow();const errors=[];page.on('pageerror',error=>errors.push(error.message));
  assert.equal(await runtime.evaluate(({app})=>app.isPackaged),true);
+ assert.equal(await runtime.evaluate(({app})=>app.getVersion()),require('../package.json').version,'A distribuição deve usar a versão atual do projeto.');
  await page.waitForFunction(name=>document.getElementById('tab-name')?.textContent===name,document.name);
  assert.ok(await page.locator('svg.app-svg').count()>15,'Os SVGs personalizados devem estar integrados.');
  const folderSvg=await fs.readFile(path.join(root,'assets/icons/folder.svg'),'utf8');

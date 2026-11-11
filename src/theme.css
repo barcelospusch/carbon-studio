@@ -77,3 +77,9 @@ dialog footer,dialog fieldset,dialog details,.field-path>button{border-color:var
 .image-hover { position:fixed; pointer-events:none; z-index:40; padding:6px; background:var(--studio-surface); border:1px solid var(--studio-border); border-radius:6px; box-shadow:0 4px 16px #0005; }
 .image-hover img { display:block; max-width:min(220px, 60vw); max-height:min(160px, 40vh); object-fit:contain; }
 #manage-image-description { overflow-wrap:anywhere; }
+
+/* Open and Save share the same theme tokens and interaction geometry. */
+.top-actions>.top-button:not(.icon-only){height:34px;padding:0 13px;border:1px solid var(--studio-border);border-radius:6px;background:var(--studio-surfaceAlt);color:var(--studio-foreground);font-size:12px}
+.top-actions>.top-button:not(.icon-only):hover:not(:disabled){background:var(--studio-raised);border-color:var(--studio-accent)}
+.top-actions>.top-button:not(.icon-only):focus-visible{outline:2px solid var(--studio-accent);outline-offset:3px}
+.top-actions>.top-button:not(.icon-only):disabled{opacity:.48;cursor:default}

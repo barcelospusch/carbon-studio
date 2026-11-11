@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const root=path.resolve(__dirname,'..');process.chdir(root);
 function run(file,args=[]){const result=spawnSync(process.execPath,[file,...args],{cwd:root,stdio:'inherit',windowsHide:true});if(result.status!==0)process.exit(result.status||1);}
 function files(directory){return fs.readdirSync(directory,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name)).flatMap(entry=>entry.isDirectory()?files(path.join(directory,entry.name)):[path.join(directory,entry.name)]);}
-const tracked=[...files('src'),...files('assets'),'logo.png','index.html','mermaid.html','tsconfig.json','vite.config.mjs','package-lock.json','package.json'];
+const tracked=[...files('src'),...files('assets'),'LANGUAGE.md','logo.png','index.html','mermaid.html','tsconfig.json','vite.config.mjs','package-lock.json','package.json'];
 const hash=crypto.createHash('sha256');for(const file of tracked)hash.update(file).update(fs.readFileSync(file));const fingerprint=hash.digest('hex');
 const cache='build/frontend-fingerprint.txt';
 run('node_modules/typescript/bin/tsc',['--noEmit']);

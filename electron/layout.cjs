@@ -6,9 +6,9 @@ const PAPERS = {
   legal: {name:'Legal', width:215.9, height:355.6},
   a5: {name:'A5', width:148, height:210},
 };
-const FIELDS = {margins:['top','bottom','left','right'], page:['size','orientation'], typography:['font','fontsize','lineheight']};
+const FIELDS = {margins:['top','bottom','left','right'], page:['size','orientation'], typography:['font','fontsize','lineheight'], paragraph:['indent-first','indent-after-heading','spacing-before','spacing-after']};
 function defaults(paper='a4') {
-  return {margins:{top:'1in',bottom:'1in',left:'1in',right:'1in'},page:{size:Object.hasOwn(PAPERS,paper.toLowerCase())?PAPERS[paper.toLowerCase()].name:'A4',orientation:'portrait'},typography:{font:'',fontsize:'12pt',lineheight:1}};
+  return {margins:{top:'1in',bottom:'1in',left:'1in',right:'1in'},page:{size:Object.hasOwn(PAPERS,paper.toLowerCase())?PAPERS[paper.toLowerCase()].name:'A4',orientation:'portrait'},typography:{font:'',fontsize:'12pt',lineheight:1},paragraph:{'indent-first':'15pt','indent-after-heading':'false','spacing-before':'0pt','spacing-after':'0pt'}};
 }
 // Split fields and strip comments outside quoted strings; never evaluate input.
 function fields(block, kind) {
@@ -23,7 +23,7 @@ function fields(block, kind) {
   if(quote)throw new Error(`@${kind}: texto entre aspas sem fechamento.`);
   const result={};
   for(const token of parts){
-    const match=token.match(/^([a-z]+)\s*:\s*(.+)$/i);
+    const match=token.match(/^([a-z-]+)\s*:\s*(.+)$/i);
     if(!match||!FIELDS[kind].includes(match[1]))throw new Error(`@${kind}: propriedade inválida: ${token}`);
     if(Object.hasOwn(result,match[1]))throw new Error(`@${kind}: propriedade duplicada: ${match[1]}`);
     result[match[1]]=match[2].trim().replace(/^(["'])(.*)\1$/,'$2');
@@ -60,15 +60,18 @@ function validateLayout(input,paper='a4') {
   if(!Number.isFinite(spacing)||spacing<=0||spacing>10)throw new Error('@typography lineheight: use um número maior que zero e até 10.');
   config.typography.lineheight=spacing;
   if(config.typography.font&&!/^[\p{L}\p{N} .,'()_-]{1,100}$/u.test(config.typography.font))throw new Error('@typography font: informe apenas o nome da família de fontes.');
+  for(const key of ['indent-first','spacing-before','spacing-after'])if(!/^(?:\d+(?:\.\d+)?)(?:cm|mm|in|pt)$/.test(config.paragraph[key]))throw new Error('@paragraph '+key+': use cm, mm, in ou pt.');
+  if(!['true','false'].includes(config.paragraph['indent-after-heading']))throw new Error('@paragraph indent-after-heading: use true ou false.');
   return config;
 }
 function extractLayout(lines,paper='a4') {
   const values={},ranges=[],remaining=[];let fenced=false,math=false;
   for(let i=0;i<lines.length;i++){
     const current=lines[i],text=current.text,trim=text.trim();
-    if(/^```/.test(text)){fenced=!fenced;remaining.push(current);continue;}
+    if(current.literal){remaining.push(current);continue;}
+    if(/^\s*```/.test(text)){fenced=!fenced;remaining.push(current);continue;}
     if(!fenced&&trim.startsWith('$$')){if(trim==='$$'||!trim.slice(2).endsWith('$$'))math=!math;remaining.push(current);continue;}
-    const match=!fenced&&!math&&text.match(/^@(margins|page|typography)\b(.*)$/);
+    const match=!fenced&&!math&&!/^@(paragraph|page)\[/.test(text)&&text.match(/^@(margins|page|typography|paragraph)\b(.*)$/);
     if(!match){remaining.push(current);continue;}
     const start=i,kind=match[1];
     try{
@@ -79,14 +82,13 @@ function extractLayout(lines,paper='a4') {
       const end=content.indexOf('}');
       if(end<0)throw new Error(`@${kind} sem } de fechamento.`);
       if(!/^\s*(?:#.*)?$/.test(content.slice(end+1)))throw new Error(`@${kind}: conteúdo inesperado após }.`);
-      values[kind]=fields(content.slice(0,end),kind);ranges.push({start,end:i});
-    }catch(error){throw new Error(`Linha ${current.line}: ${error.message}`);}
+      values[kind]=fields(content.slice(0,end),kind);ranges.push({start,end:i,kind,origin:{file:current.file,line:current.line}});
+    }catch(error){const failure=new Error(`Linha ${current.line}: ${error.message}`);failure.diagnostics=[{severity:'error',file:current.file,line:current.line,column:1,message:error.message}];throw failure;}
   }
-  return {layout:validateLayout(values,paper),remaining,ranges,explicit:Object.keys(values)};
+  let layout;try{layout=validateLayout(values,paper);}catch(error){const kind=error.message.match(/^@(\w+)/)?.[1]||(/margem|margens/i.test(error.message)?'margins':'page'),origin=ranges.find(range=>range.kind===kind)?.origin||{file:lines[0]?.file,line:1};error.diagnostics=[{severity:'error',...origin,column:1,message:error.message}];throw error;}
+  return {layout,remaining,ranges,explicit:Object.keys(values)};
 }
-function readLayout(source,paper='a4'){
-  return extractLayout(source.replace(/\r\n?/g,'\n').split('\n').map((text,index)=>({text,line:index+1})),paper);
-}
+function readLayout(source,paper='a4'){return extractLayout(require('./source.cjs').sourceLines(source),paper);}
 function applyLayout(source,values,paper='a4'){
   const config=validateLayout(values,paper),parsed=readLayout(source,paper);
   const lines=source.replace(/\r\n?/g,'\n').split('\n'),omit=new Set();
@@ -110,4 +112,4 @@ function placement(text=''){
   const hints=positions.filter(value=>value!=='!').join('')||'htbp';
   return (positions.includes('!')?'!':'')+hints;
 }
-module.exports={PAPERS,defaults,validateLayout,extractLayout,readLayout,applyLayout,placement};
+module.exports={PAPERS,dimension,defaults,validateLayout,extractLayout,readLayout,applyLayout,placement};

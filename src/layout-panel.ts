@@ -23,6 +23,13 @@ export function installLayoutPanel(editor:MonacoEditor.IStandaloneCodeEditor,toa
     <datalist id="document-fonts"><option value="Latin Modern Roman"></option><option value="TeX Gyre Heros"></option><option value="TeX Gyre Termes"></option><option value="TeX Gyre Pagella"></option><option value="Arial"></option><option value="Times New Roman"></option><option value="Liberation Sans"></option></datalist>
     <p class="layout-note">Latin Modern e TeX Gyre usam fontes TeX. Outras famílias, como Liberation Sans, precisam estar instaladas no Windows. A fonte das equações continua sendo matemática TeX.</p>
     <div class="layout-grid"><label>Tamanho da fonte<input name="fontsize" required placeholder="12pt"/></label><label>Entrelinha<input name="lineheight" type="number" min="0.01" max="10" step="any" required/></label></div>
+    <fieldset><legend>Parágrafos</legend><div class="layout-grid">
+    <label>Recuo da primeira linha<input name="indent-first" required placeholder="1.25cm"/></label>
+    <label>Recuar após título<select name="indent-after-heading"><option value="false">Não</option><option value="true">Sim</option></select></label>
+    <label>Espaço antes<input name="spacing-before" required placeholder="0pt"/></label>
+    <label>Espaço depois<input name="spacing-after" required placeholder="6pt"/></label>
+    </div></fieldset>
+    <button type="button" id="open-column-link-options">Colunas e aparência dos links…</button>
     <p id="layout-error" class="form-error" role="alert"></p>
     <footer><button type="button" data-close-layout>Cancelar</button><button type="submit" class="primary">Aplicar ao documento</button></footer>
   </form></dialog>
@@ -46,10 +53,11 @@ export function installLayoutPanel(editor:MonacoEditor.IStandaloneCodeEditor,toa
     }catch(problem){toast(problem instanceof Error?problem.message:String(problem));}
   };
   for(const button of document.querySelectorAll<HTMLButtonElement>('[data-close-layout]'))button.onclick=()=>dialog.close();
+  document.getElementById('open-column-link-options')!.onclick=()=>{dialog.close();document.getElementById('document-options')!.click();};
   form.onsubmit=async event=>{
     event.preventDefault();error.textContent='';
     const source=editor.getValue();
-    const layout:DocumentLayout={margins:{top:field('top').value,bottom:field('bottom').value,left:field('left').value,right:field('right').value},page:{size:field('size').value,orientation:field('orientation').value},typography:{font:field('font').value,fontsize:field('fontsize').value,lineheight:Number(field('lineheight').value)}};
+    const layout:DocumentLayout={margins:{top:field('top').value,bottom:field('bottom').value,left:field('left').value,right:field('right').value},page:{size:field('size').value,orientation:field('orientation').value},typography:{font:field('font').value,fontsize:field('fontsize').value,lineheight:Number(field('lineheight').value)},paragraph:{'indent-first':field('indent-first').value,'indent-after-heading':field('indent-after-heading').value,'spacing-before':field('spacing-before').value,'spacing-after':field('spacing-after').value}};
     try{
       const replacement=unwrap(await api.applyLayout(source,layout));
       if(editor.getValue()!==source)throw new Error('O documento mudou. Aplique o layout novamente.');

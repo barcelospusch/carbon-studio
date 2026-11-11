@@ -1,4 +1,7 @@
 import mermaid from 'mermaid';
+import {getDocument,GlobalWorkerOptions} from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+GlobalWorkerOptions.workerSrc=pdfWorker;
 
 mermaid.initialize({
   startOnLoad: false,
@@ -11,6 +14,12 @@ mermaid.initialize({
 });
 
 Object.assign(window, {
+  async validateCarbonAsset(url:string,extension:string,page:number){
+    if(extension==='.pdf'){
+      const task=getDocument({url,disableRange:true,disableStream:true,enableXfa:false});
+      try{const pdf=await task.promise;if(page>pdf.numPages)throw new Error('Página '+page+' ausente no PDF ('+pdf.numPages+' páginas).');await pdf.getPage(page);}finally{await task.destroy();}
+    }else{const image=new Image();image.src=url;try{await image.decode();}catch{throw new Error('Imagem corrompida ou impossível de decodificar.');}if(!image.naturalWidth||!image.naturalHeight)throw new Error('Imagem sem dimensões válidas.');image.src='';}
+  },
   async renderCarbonDiagram(source: string) {
     const {svg} = await mermaid.render('carbon-diagram', source);
     const graphic = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement;
