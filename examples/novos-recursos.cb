@@ -1,0 +1,115 @@
+@title Scientific Carbon
+@language en
+@paragraph {indent-first: 1.25cm, indent-after-heading: true, spacing-before: 0pt, spacing-after: 6pt}
+@links {color: "#2563EB", underline: true, underline-style: solid}
+@links[internal][
+  color: "#333333",
+  underline: false
+]
+@let project = **Carbon Studio**
+@style emphasis {align: left, weight: bold, italic: true, indent: 0pt}
+
+@abstract[
+This document demonstrates @var(project) scientific composition.
+]
+@keywords science, publishing, Carbon
+
+# Introduction
+// Comments are absent from the PDF.
+/* This comment spans
+two source lines. */
+Text with **bold**, *italic*, $E=mc^2$ and a [link](https://example.com).
+
+@paragraph[indent=0pt][
+This paragraph has no first-line indentation and keeps **inline formatting**.
+]
+
+@theorem[label=th:identity title="Identity"][
+For every real $x$, $x=x$.
+]
+@proof[
+The result follows from reflexivity.
+]
+@definition[
+A measurement assigns a value to a quantity.
+]
+@warning[
+Use consistent units.
+]
+@note[
+Uncertainties are expressed at $1\sigma$.
+]
+
+@eq[label=eq:energy number=auto][
+E = mc^2
+]
+@equations[label=eq:system number=7][
+x+y=10
+x-y=2
+]
+See @eqref(eq:energy) and @eqref(eq:system).
+
+@caption[position=right align=left width=30% gap=0.5cm]
+@source Laboratory archive.
+@note Values shown at $1\sigma$.
+![Experimental results.](figures/logo.png){#fig:results width=70%}
+
+@figure[group=horizontal gap=0.5cm label=fig:comparison][
+@subfigure[label=fig:a width=50%][
+@caption[position=bottom align=center]
+![Experiment.](figures/logo.png)
+]
+@subfigure[label=fig:b width=50%][
+![Simulation.](figures/logo.png)
+]
+@group-caption Comparison of results.
+]
+See @refs(fig:a,fig:b), @autoref(fig:comparison) and page @pageref(fig:a).
+
+@caption[position=bottom align=left] Measurements.
+@source Laboratory.
+@note Repeated observations.
+| Quantity | Value |
+| --- | ---: |
+| Mass | 10 |
+
+@columns[count=2 gap=0.8cm divider=true divider-style=dashed divider-width=0.4pt divider-padding=0.25cm balance=true][
+## First column
+This text occupies the first column.
+
+- One observation.
+- Another observation.
+
+@columnbreak
+## Second column
+This text occupies the second column.
+
+@eq[number=none][
+a=b
+]
+]
+
+@style[emphasis][
+Reusable styles keep the source readable.
+]
+@numbering[figure=Roman]
+@setcounter[figure=4]
+@keep-with-next
+## Code
+@code[language=javascript caption="A computation" label=code:example][
+const value = 2;
+// Kept as code.
+console.log(value);
+]
+
+@page[size=A5 orientation=landscape][
+# Landscape page
+This section uses a different paper size and orientation.
+]
+
+# Return to portrait
+@keep[
+These paragraphs stay together when they fit on a page.
+
+End of the demonstration.
+]

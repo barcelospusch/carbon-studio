@@ -51,7 +51,7 @@ function expandMatrices(text) {
   return output + text.slice(cursor);
 }
 
-function equation(attributes, lines, math) {
+function equation(attributes, lines, math, system=false) {
   const options = new Map();
   for (const part of attributes.trim().split(/\s+/).filter(Boolean)) {
     const match = part.match(/^(align|label|number)=([\w:.-]+)$/);
@@ -61,16 +61,18 @@ function equation(attributes, lines, math) {
   const align = options.get('align') || 'equals';
   const label = options.get('label');
   const number = options.get('number');
-  if (!['equals', 'left', 'right', 'center'].includes(align) || (number && !/^(auto|\d+)$/.test(number))) {
-    throw new Error('Use align=equals/left/right/center e number=auto ou um inteiro.');
+  if (!['equals', 'left', 'right', 'center'].includes(align) || (number && !/^(auto|none|\d+)$/.test(number))) {
+    throw new Error('Use align=equals/left/right/center e number=auto, none ou um inteiro.');
   }
-  const rows = lines.filter(line => line.trim()).map(math);
+  if(number==='none'&&label)throw new Error('Uma equação sem numeração não pode ter label.');
+  const rows = lines.filter(line => line.trim()).map(line=>math(line.replace(/\\\\\s*$/,'')));
   if (!rows.length) throw new Error('Equação vazia.');
   const side = align === 'left' || align === 'right';
-  const environment = (side ? 'flalign' : 'equation') + (label || number ? '' : '*');
+  const environment = (side ? 'flalign' : 'equation') + (number==='none' ? '*' : label || number ? '' : '*');
   let contents;
   if (align === 'equals') {
     contents = '\\begin{aligned}' + rows.map(row => {
+      if(splitMath(row,'&').length>1)return row;
       const parts = splitMath(row, '=');
       return parts.length > 1 ? parts.shift() + '&=' + parts.join('=') : '&' + row;
     }).join(' \\\\ ') + '\\end{aligned}';
@@ -79,7 +81,8 @@ function equation(attributes, lines, math) {
     const array = '\\begin{array}{@{}' + column + '@{}}' + rows.map(row => '\\displaystyle ' + row).join(' \\\\ ') + '\\end{array}';
     contents = align === 'left' ? '&' + array + '&&' : align === 'right' ? '&&' + array + '&' : array;
   }
-  const tag = number && number !== 'auto' ? '\\tag{' + number + '}' : '';
+  if(system){if(side)throw new Error('@equations aceita align=equals ou center.');contents='\\left\\{'+contents+'\\right.';}
+  const tag = number && !['auto','none'].includes(number) ? '\\tag{' + number + '}' : '';
   return '\\begin{' + environment + '}\n' + contents + tag + (label ? '\\label{' + label + '}' : '') + '\n\\end{' + environment + '}';
 }
 

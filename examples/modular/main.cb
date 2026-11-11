@@ -1,0 +1,6 @@
+@title Projeto modular
+@type report
+@import referencias.cb
+@include capitulos/01-introducao.cb
+@include capitulos/02-resultados.cb
+@print_bibliography

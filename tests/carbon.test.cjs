@@ -11,10 +11,10 @@ test('imports, bibliography and six citation styles',async t=>{
  for(const style of ['abnt','ieee','apa','mla','vancouver','chicago']){const {tex,citations}=await transpile(`@import refs.cb\n@title Teste\nCitação @cite(ana).\n@print_bibliography[style=${style}]`,o);assert.equal(citations,1);assert.match(tex,/hypertarget\{bib:ana\}/);assert.match(tex,/Pesquisa/);assert.doesNotMatch(tex,/@entry/);}
 });
 test('actionable errors for circular imports, missing references and unfinished math',async t=>{
- const o=await options(t);await fs.writeFile(path.join(o.base,'cycle.cb'),'@import cycle.cb');await assert.rejects(transpile('@import cycle.cb',o),/circular/);await assert.rejects(transpile('@cite(missing)',o),/não encontrada/);await assert.rejects(transpile('$$\nx+1',o),/fechamento/);await assert.rejects(transpile('$$\\input{secret}$$',o),/não permitido/);await assert.rejects(transpile('@mermaid #fig:missing',o),/não encontrado/);
+ const o=await options(t);await fs.writeFile(path.join(o.base,'cycle.cb'),'@import cycle.cb');assert.match((await transpile('@import cycle.cb',o)).diagnostics[0].message,/circular/);assert.match((await transpile('@cite(missing)',o)).diagnostics[0].message,/não encontrada/);await assert.rejects(transpile('$$\nx+1',o),/fechamento/);await assert.rejects(transpile('$$\\input{secret}$$',o),/não permitido/);assert.match((await transpile('@mermaid #fig:missing',o)).diagnostics[0].message,/não encontrado/);
 });
 test('external Mermaid library resolves ids and requests configured renderer',async t=>{
- const o=await options(t);await fs.writeFile(path.join(o.base,'graphs.mmd'),'#fig:flow{\ngraph LR\nA --> B\n}\n');await assert.rejects(transpile('@import graphs.mmd\n@mermaid #fig:flow width=80%',o),/Mermaid CLI/);
+ const o=await options(t);await fs.writeFile(path.join(o.base,'graphs.mmd'),'#fig:flow{\ngraph LR\nA --> B\n}\n');assert.match((await transpile('@import graphs.mmd\n@mermaid #fig:flow width=80%',o)).diagnostics[0].message,/Mermaid CLI/);
 });
 test('real Carbon to LaTeX to PDF pipeline',{skip:!process.env.CARBON_TEST_PDF,timeout:180000},async t=>{
  const o=await options(t);o.tectonic=path.resolve(__dirname,'../build/tectonic.exe');o.timeout=170000;o.onLog=()=>{};await compileCarbon(await fs.readFile(path.resolve(__dirname,'../examples/primeiro-artigo.cb'),'utf8'),o);const pdf=await fs.readFile(path.join(o.directory,'preview.pdf'));assert.equal(pdf.subarray(0,5).toString(),'%PDF-');assert.ok(pdf.length>10000);

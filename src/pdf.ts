@@ -4,7 +4,8 @@ GlobalWorkerOptions.workerSrc=pdfWorker;
 export class PdfPreview {
   private pdf:PDFDocumentProxy|null=null;
   private generation=0;
-  private scale:number|null=null;
+  private scale:number|null|'page'=null;
+  private loadingGeneration=0;
   private activeTasks=new Set<{cancel:()=>void}>();
   private observer:IntersectionObserver|null=null;
   private queue:Promise<void>=Promise.resolve();
@@ -13,11 +14,12 @@ export class PdfPreview {
   constructor(private host:HTMLElement,private onPages:(count:number)=>void){}
   get count(){return this.pdf?.numPages??0;}
   async load(bytes:Uint8Array){
-    const pdf=await getDocument({data:new Uint8Array(bytes),enableXfa:false}).promise;
+    const token=++this.loadingGeneration;const task=getDocument({data:bytes,enableXfa:false});const pdf=await task.promise;
+    if(token!==this.loadingGeneration){await task.destroy();return;}
     const previous=this.pdf;this.pdf=pdf;this.onPages(pdf.numPages);
     await this.render();await previous?.loadingTask.destroy();
   }
-  setZoom(value:number|null){this.scale=value;return this.render();}
+  setZoom(value:number|null|'page'){this.scale=value;return this.render();}
   private cancel(){++this.generation;this.observer?.disconnect();this.observer=null;for(const task of this.activeTasks)task.cancel();}
   private async draw(wrapper:HTMLElement,page:PDFPageProxy,scale:number,token:number){
     if(token!==this.generation||this.rendered.has(wrapper))return;
@@ -64,14 +66,14 @@ export class PdfPreview {
     },{root:this.host,rootMargin:'600px 0px'});this.observer=observer;
     for(let number=1;number<=pdf.numPages;number++){
       if(token!==this.generation)return;const page=await pdf.getPage(number);if(token!==this.generation)return;
-      const baseline=page.getViewport({scale:1});const scale=this.scale??Math.min(2,available/baseline.width);const viewport=page.getViewport({scale});
+      const baseline=page.getViewport({scale:1});const scale=this.scale==='page'?Math.min(2,available/baseline.width,Math.max(100,this.host.clientHeight-60)/baseline.height):this.scale??Math.min(2,available/baseline.width);const viewport=page.getViewport({scale});
       const wrapper=document.createElement('section');wrapper.className='pdf-page';wrapper.dataset.page=String(number);wrapper.style.width=`${viewport.width}px`;wrapper.style.height=`${viewport.height}px`;wrapper.setAttribute('aria-label',`Página ${number} do PDF`);
       this.host.append(wrapper);pages.set(wrapper,{page,scale});observer.observe(wrapper);
     }
     const selected=Array.from(pages.entries()).find(([wrapper])=>Number(wrapper.dataset.page)===Math.min(previousPage,pdf.numPages))??Array.from(pages.entries())[0];
     if(selected){const [wrapper,item]=selected;this.queued.add(wrapper);this.queue=this.queue.catch(()=>{}).then(()=>this.draw(wrapper,item.page,item.scale,token)).finally(()=>this.queued.delete(wrapper));await this.queue;}
   }
-  async clear(){this.cancel();const pdf=this.pdf;this.pdf=null;await this.queue.catch(()=>{});await pdf?.loadingTask.destroy();this.host.replaceChildren();this.onPages(0);}
+  async clear(){++this.loadingGeneration;this.cancel();const pdf=this.pdf;this.pdf=null;await this.queue.catch(()=>{});await pdf?.loadingTask.destroy();this.host.replaceChildren();this.onPages(0);}
   currentPage(){const bounds=this.host.getBoundingClientRect();const nodes=Array.from(this.host.querySelectorAll<HTMLElement>('.pdf-page'));return Number(nodes.find(p=>p.getBoundingClientRect().bottom>bounds.top+70)?.dataset.page??1);}
   goTo(page:number){this.host.querySelector(`[data-page="${Math.max(1,Math.min(this.count,page))}"]`)?.scrollIntoView({behavior:'smooth',block:'start'});}
 }

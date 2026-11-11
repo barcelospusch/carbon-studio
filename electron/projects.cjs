@@ -24,9 +24,15 @@ async function scanProject(folder){
  await walk(root,0);return {root,entries,documents};
 }
 async function projectDocument(root,relative){
- if(typeof relative!=='string'||path.isAbsolute(relative)||path.extname(relative).toLowerCase()!=='.cb')throw new Error('Selecione um arquivo Carbon do projeto.');
+ if(typeof relative!=='string'||path.isAbsolute(relative)||!['.cb','.md','.markdown','.mmd'].includes(path.extname(relative).toLowerCase()))throw new Error('Selecione um arquivo de texto do projeto.');
  const file=await fs.realpath(path.resolve(root,relative));
  if(!inside(root,file))throw new Error('O documento está fora da pasta do projeto.');
  return file;
 }
-module.exports={scanProject,projectDocument,inside};
+async function projectFile(root,relative){
+ if(typeof relative!=='string'||path.isAbsolute(relative))throw new Error('Selecione um arquivo do projeto.');
+ const canonical=await fs.realpath(root),file=await fs.realpath(path.resolve(canonical,relative));
+ if(!inside(canonical,file)||!(await fs.stat(file)).isFile())throw new Error('Arquivo fora da pasta do projeto.');
+ return file;
+}
+module.exports={scanProject,projectDocument,projectFile,inside};

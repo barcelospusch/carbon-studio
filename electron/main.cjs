@@ -5,10 +5,11 @@ const path = require('node:path');
 const os = require('node:os');
 const { pathToFileURL } = require('node:url');
 const core = require('./core.cjs');
+const {compilationRoot}=require('./compilation-project.cjs');
 const {compileCarbon} = require('./carbon.cjs');
 const {readLayout,applyLayout} = require('./layout.cjs');
 const {alignmentEdit} = require('./alignment.cjs');
-const {scanProject,projectDocument,inside}=require('./projects.cjs');
+const {scanProject,projectDocument,projectFile,inside}=require('./projects.cjs');
 const {publicSettings,authorDirective}=require('./preferences.cjs');
 const {loadThemes}=require('./themes.cjs');
 const {mermaidRenderer}=require('./mermaid.cjs');
@@ -18,7 +19,11 @@ const root = path.resolve(__dirname, '..');
 const TEMPLATE = '@title Novo documento\n@author Seu nome\n@date @today\n\n# Introdução\nEscreva suas ideias com **clareza**, *ênfase* e matemática $E = mc^2$.\n\nO Carbon organiza o conteúdo e cuida da composição do documento.\n\n## Uma linguagem para suas ideias\nEdite este documento e clique em Recompilar para atualizar a prévia.\n\n$$\nf(x) = \\frac{\\alpha x^2 + \\beta}{\\sqrt{1 + x^2}}\n$$\n\n# Resultados\n@caption Comparação dos resultados.\n| Método | Amostras | Resultado |\n| --- | --- | --- |\n| Carbon | 120 | **Aprovado** |\n| Referência | 120 | *Comparável* |\n\n# Conclusão\nUm espaço para transformar ideias em documentos bem compostos.\n';
 let window, current = { path: null, text: '', savedText: '', fingerprint: null };
 let workspace=null, projectSnapshot={entries:[],documents:[]}, active=false, themeStore;
-let imagePreview;
+let imagePreview,validationController;
+let watchedDependencies=new Map(),checkingDependencies=false;
+const dependencyStamp=async file=>fs.stat(file).then(stat=>stat.mtimeMs+':'+stat.size).catch(()=>null);
+async function watchDependencies(files){watchedDependencies=new Map(await Promise.all(files.map(async file=>[file,await dependencyStamp(file)])));}
+const dependencyTimer=setInterval(async()=>{if(checkingDependencies||busy||mutation||!active||!current.path||!watchedDependencies.size)return;checkingDependencies=true;try{let changed=false;for(const [file,stamp] of watchedDependencies){const next=await dependencyStamp(file);if(next!==stamp){watchedDependencies.set(file,next);changed=true;}}if(changed)send({type:'dependencies-changed'});}finally{checkingDependencies=false;}},1000);dependencyTimer.unref();
 let availableUpdate;
 const template=()=>TEMPLATE.replace('@author Seu nome',()=>authorDirective(preferences));
 function cvTemplate(){
@@ -62,10 +67,11 @@ function persistRecovery() {
   return persistence;
 }
 async function load(file,selectedRoot=workspace) {
+  validationController?.abort();
   const value = await core.readDocument(file);
   const nextRoot=selectedRoot&&inside(selectedRoot,value.path)?selectedRoot:path.dirname(value.path);
   const scanned=await scanProject(nextRoot);workspace=scanned.root;projectSnapshot=scanned;
-  current = { ...value, savedText: value.text }; preview = null;active=true;
+  watchedDependencies.clear();current = { ...value, savedText: value.text }; preview = null;active=true;
   await persistRecovery(); return announce();
 }
 async function openFolder(folder){
@@ -79,9 +85,10 @@ async function save(saveAs = false) {
   if(!active)throw new Error('Abra um documento ou comece do template.');
   let file = current.path;
   if (saveAs || !file) {
-    const choice = await dialog.showSaveDialog(window, { title: 'Salvar documento Carbon', defaultPath: file || path.join(workspace||app.getPath('documents'),'documento.cb'), filters: [{ name: 'Documento Carbon', extensions: ['cb'] }] });
+    const extension=path.extname(file||'.cb').slice(1)||'cb';
+    const choice = await dialog.showSaveDialog(window, { title: 'Salvar documento', defaultPath: file || path.join(workspace||app.getPath('documents'),'documento.cb'), filters: [{ name: 'Documento', extensions: [extension] }] });
     if (choice.canceled || !choice.filePath) return null;
-    file = choice.filePath.toLowerCase().endsWith('.cb') ? choice.filePath : choice.filePath + '.cb';
+    file = choice.filePath.toLowerCase().endsWith('.'+extension) ? choice.filePath : choice.filePath + '.'+extension;
   } else if (await core.fingerprint(file) !== current.fingerprint) {
     const choice = await dialog.showMessageBox(window, { type: 'warning', title: 'Arquivo alterado fora do editor', message: 'Este arquivo mudou em outro aplicativo.', detail: 'Salve uma cópia para manter as duas versões, ou substitua a versão no disco.', buttons: ['Salvar como…', 'Sobrescrever', 'Cancelar'], defaultId: 0, cancelId: 2 });
     if (choice.response === 2) return null;
@@ -127,10 +134,12 @@ function sanitizeSettings(value) {
 }
 async function compile() {
   if(!active)throw new Error('Abra um documento ou comece do template.');
+  if(current.path&&!/\.cb$/i.test(current.path))throw new Error('Apenas arquivos .cb usam o compilador Carbon.');
   if (busy) throw new Error('Já existe uma compilação em andamento.');
   if (mutation) throw new Error('Aguarde a operação atual do documento.');
   if (!current.path && !await save()) return null;
-  busy = true; controller = new AbortController();
+  if(preview&&preview.documentPath===current.path&&preview.source===current.text){let unchanged=true;for(const [file,stamp] of preview.stamps)if(await dependencyStamp(file)!==stamp){unchanged=false;break;}if(unchanged)return {bytes:new Uint8Array(await fs.readFile(preview.path)),duration:0,stale:false,diagnostics:preview.diagnostics,dependencies:[...preview.stamps.keys()]};}
+  validationController?.abort();busy = true; controller = new AbortController();
   const started = Date.now(), source = current.text, documentPath = current.path, options = { ...preferences };
   const renderer=mermaidRenderer(new URL('mermaid.html',process.env.CARBON_STUDIO_DEV_URL||'carbon-studio://app/').href,serveApp);
   let directory;
@@ -138,29 +147,31 @@ async function compile() {
   try {
     if (!await fs.stat(options.tectonic).then(s => s.isFile()).catch(() => false)) throw new Error('O motor PDF incluído no aplicativo não foi encontrado. Reinstale o Carbon Studio ou prepare o ambiente de desenvolvimento.');
     directory = await fs.mkdtemp(path.join(cache, 'compile-'));
-    const snapshot = path.join(directory, 'documento.cb'), output = path.join(directory, 'preview.pdf');
-    await fs.writeFile(snapshot, source);
-    await compileCarbon(source, { ...options, renderMermaid:renderer.render, base:path.dirname(documentPath), directory, signal:controller.signal, onLog:(stream,text)=>send({type:'compile-log',stream,text}) });
+    const output = path.join(directory, 'preview.pdf');
+    const main=await compilationRoot(workspace,projectSnapshot.documents,documentPath,source);
+    const result=await compileCarbon(main.source, { ...options,isolate:true,buffers:main.file===documentPath?{}:{[documentPath]:source}, renderMermaid:renderer.render,validateAsset:renderer.validate, base:path.dirname(main.file),file:main.file,root:workspace||path.dirname(documentPath), directory, signal:controller.signal, onLog:(stream,text)=>send({type:'compile-log',stream,text}) });
+    await watchDependencies([...new Set([main.file,...result.dependencies])]);
     const bytes = await fs.readFile(output);
     if (!bytes.subarray(0,5).equals(Buffer.from('%PDF-'))) throw new Error('O compilador não produziu um PDF válido.');
-    if (bytes.length > 128*1024*1024) throw new Error('O PDF excede o limite de prévia de 128 MiB.');
     const previous = preview;
-    preview = { path: output, source, directory, documentPath };
+    preview = { path: output, source, directory, documentPath,diagnostics:result.diagnostics,stamps:new Map(watchedDependencies) };
     if (previous) await fs.rm(previous.directory, { recursive: true, force: true }).catch(() => {});
     directory = null;
-    const response = { bytes: new Uint8Array(bytes), duration: Date.now()-started, stale: current.text !== source };
+    const response = { bytes: new Uint8Array(bytes.buffer,bytes.byteOffset,bytes.byteLength), duration: Date.now()-started, stale: current.text !== source,diagnostics:result.diagnostics,dependencies:result.dependencies };
     send({ type: 'compile-success', duration: response.duration, stale: response.stale });
     return response;
+  } catch(error){send({type:'diagnostics',diagnostics:error.diagnostics||[{severity:'error',file:documentPath,line:1,column:1,message:errorMessage(error)}]});throw error;
   } finally {
     renderer.close();
     if (directory) await fs.rm(directory, { recursive: true, force: true }).catch(() => {});
     busy = false; controller = null; send({ type: 'compile-end' });
   }
 }
-function serveApp(request){
+async function serveApp(request){
       try {
         const url=new URL(request.url);
         if(url.hostname!=='app')return new Response('Forbidden',{status:403});
+        if(url.pathname==='/resource'){if(!workspace)return new Response('Forbidden',{status:403});const file=await projectFile(workspace,path.relative(workspace,path.resolve(url.searchParams.get('path')||'')));if(!['.png','.jpg','.jpeg','.pdf'].includes(path.extname(file).toLowerCase()))return new Response('Forbidden',{status:403});const response=await net.fetch(pathToFileURL(file).href);const headers=new Headers(response.headers);if(request.headers.get('origin')==='http://127.0.0.1:5173')headers.set('Access-Control-Allow-Origin','http://127.0.0.1:5173');return new Response(response.body,{status:response.status,headers});}
         const base=path.resolve(__dirname,'../dist');
         const file=path.resolve(base,'.'+decodeURIComponent(url.pathname));
         if(!file.startsWith(base+path.sep))return new Response('Forbidden',{status:403});
@@ -202,6 +213,19 @@ function registerIpc() {
     return choice.canceled ? null : openFolder(choice.filePaths[0]);
   }));
   handle('studio:select-document', relative=>changeDocument(async()=>{if(!workspace)throw new Error('Selecione uma pasta primeiro.');if(!await confirmDiscard())return null;return load(await projectDocument(workspace,relative));}));
+  handle('studio:project-file', async ({relative,action})=>{
+    if(!workspace)throw new Error('Abra uma pasta de projeto primeiro.');
+    const file=await projectFile(workspace,relative);
+    if(action==='reveal'){shell.showItemInFolder(file);return null;}
+    if(action==='pdf'&&/\.pdf$/i.test(file))return new Uint8Array(await fs.readFile(file));
+    throw new Error('Ação de arquivo inválida.');
+  });
+  handle('studio:external-link',async value=>{const url=new URL(value);if(!['http:','https:'].includes(url.protocol))throw new Error('Link não permitido.');await shell.openExternal(url.href);return null;});
+  handle('studio:local-image',async relative=>{
+    if(!workspace||!current.path)throw new Error('Selecione um documento.');
+    const requested=path.relative(workspace,path.resolve(path.dirname(current.path),relative));
+    return readProjectImage(await projectImage(workspace,requested));
+  });
   handle('studio:refresh-project', async()=>{await refreshProject();return announce(false);});
   handle('studio:project-item', ({kind,folder='',name=''})=>changeDocument(async()=>{
     if(!workspace)throw new Error('Abra uma pasta de projeto primeiro.');
@@ -264,8 +288,21 @@ function registerIpc() {
   }));
   handle('studio:save', ({saveAs} = {}) => changeDocument(() => save(!!saveAs)));
   ipcMain.on('studio:edit', (event, text) => {
-    try { trusted(event); if(!active)return;current.text = core.validateSource(text); title(); clearTimeout(recoveryTimer); recoveryTimer=setTimeout(persistRecovery,750); }
+    try { trusted(event); if(!active)return;current.text = core.validateSource(text);validationController?.abort(); title(); clearTimeout(recoveryTimer); recoveryTimer=setTimeout(persistRecovery,750); }
     catch (error) { send({type:'notice',message:errorMessage(error)}); }
+  });
+  handle('studio:validate',async()=>{
+    validationController?.abort();
+    if(busy||!active||!current.path||!/\.cb$/i.test(current.path))return null;
+    const validation=new AbortController();validationController=validation;
+    const documentPath=current.path,source=current.text,directory=await fs.mkdtemp(path.join(cache,'validate-'));
+    const renderer=mermaidRenderer(new URL('mermaid.html',process.env.CARBON_STUDIO_DEV_URL||'carbon-studio://app/').href,serveApp);
+    try{
+      const main=await compilationRoot(workspace,projectSnapshot.documents,documentPath,source);
+      const result=await require('./isolated-transpile.cjs').isolatedTranspile(main.source,{base:path.dirname(main.file),file:main.file,root:workspace,directory,validateOnly:true,buffers:main.file===documentPath?{}:{[documentPath]:source},paper:preferences.paper,signal:validation.signal,renderMermaid:renderer.render,validateAsset:renderer.validate});
+      return validation.signal.aborted?null:result.diagnostics;
+    }catch(error){if(validation.signal.aborted)return null;return error.diagnostics||[{severity:'error',file:documentPath,line:1,column:1,message:errorMessage(error)}];}
+    finally{renderer.close();await fs.rm(directory,{recursive:true,force:true}).catch(()=>{});if(validationController===validation)validationController=null;}
   });
   handle('studio:compile', compile);
   handle('studio:cancel', () => { controller?.abort(); return null; });
@@ -278,6 +315,7 @@ function registerIpc() {
   });
   handle('studio:image', async () => {
     if (!current.path && !await save()) return null;
+  if(preview&&preview.documentPath===current.path&&preview.source===current.text){let unchanged=true;for(const [file,stamp] of preview.stamps)if(await dependencyStamp(file)!==stamp){unchanged=false;break;}if(unchanged)return {bytes:new Uint8Array(await fs.readFile(preview.path)),duration:0,stale:false,diagnostics:preview.diagnostics,dependencies:[...preview.stamps.keys()]};}
     const choice = await dialog.showOpenDialog(window, { title:'Inserir figura', filters:[{name:'Imagem ou PDF',extensions:['png','jpg','jpeg','pdf']}], properties:['openFile'] });
     if (choice.canceled) return null;
     const relative = path.relative(path.dirname(current.path),choice.filePaths[0]).replaceAll('\\','/');
@@ -290,6 +328,8 @@ function registerIpc() {
   handle('studio:check-update', async()=> (availableUpdate=await checkUpdate(app.getVersion()))?.version ?? null);
   handle('studio:open-update', ()=>availableUpdate ? shell.openExternal(availableUpdate.url) : null);
   handle('studio:themes-folder', async()=>{const error=await shell.openPath(themeStore.directory);if(error)throw new Error(error);return null;});
+  handle('studio:document-options',source=>{const {readDocumentOptions}=require('./document-options.cjs');const {columns,links}=readDocumentOptions(core.validateSource(source));return {columns:columns||null,links};});
+  handle('studio:document-options-apply',({source,options})=>require('./document-options.cjs').applyDocumentOptions(core.validateSource(source),options));
   handle('studio:layout', source => readLayout(core.validateSource(source),preferences.paper).layout);
   handle('studio:layout-apply', ({source,layout}) => applyLayout(core.validateSource(source),layout,preferences.paper));
   handle('studio:alignment', ({source,selection,target,mode}) => alignmentEdit(core.validateSource(source),{...selection,target,mode}));
@@ -322,7 +362,7 @@ function createWindow() {
     if (allowClose) return; event.preventDefault();
     if (mutation) return;
     mutation=true;
-    (async()=>{ try { if (!await confirmDiscard()) return; controller?.abort(); clearTimeout(recoveryTimer); if(dirty()){await persistence; await fs.unlink(recoveryFile).catch(()=>{});}else{await persistRecovery();} allowClose=true; window.close(); } finally { mutation=false; } })().catch(error=>dialog.showErrorBox('Carbon Studio',errorMessage(error)));
+    (async()=>{ try { if (!await confirmDiscard()) return; controller?.abort();validationController?.abort(); clearTimeout(recoveryTimer); if(dirty()){await persistence; await fs.unlink(recoveryFile).catch(()=>{});}else{await persistRecovery();} allowClose=true; window.close(); } finally { mutation=false; } })().catch(error=>dialog.showErrorBox('Carbon Studio',errorMessage(error)));
   });
   const dev=process.env.CARBON_STUDIO_DEV_URL;
   if (dev) { if (new URL(dev).origin !== 'http://127.0.0.1:5173') throw new Error('URL de desenvolvimento inválida.'); window.loadURL(dev); }
@@ -345,5 +385,5 @@ else {
     registerIpc(); menu(); createWindow();
   }).catch(error=>{ dialog.showErrorBox('Falha ao iniciar Carbon Studio',errorMessage(error)); app.quit(); });
   app.on('window-all-closed',()=>app.quit());
-  app.on('will-quit',()=>{ if(cache)fs.rm(cache,{recursive:true,force:true}).catch(()=>{}); });
+  app.on('will-quit',()=>{clearInterval(dependencyTimer); if(cache)fs.rm(cache,{recursive:true,force:true}).catch(()=>{}); });
 }

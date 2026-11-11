@@ -1,6 +1,6 @@
 {
   "name": "carbon-studio",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "description": "Editor Carbon para Windows: Carbon → LaTeX → PDF",
   "author": "Carbon Studio",
@@ -14,14 +14,15 @@
     "typecheck": "tsc --noEmit",
     "build": "npm run typecheck && vite build",
     "start": "electron .",
-    "test": "node --test tests/core.test.cjs tests/carbon.test.cjs tests/layout.test.cjs tests/alignment.test.cjs tests/workspace.test.cjs tests/features.test.cjs",
-    "test:e2e": "node --test --test-concurrency=1 tests/e2e.test.cjs tests/layout-e2e.test.cjs tests/alignment-e2e.test.cjs tests/features-e2e.test.cjs",
+    "test": "node --test tests/core.test.cjs tests/carbon.test.cjs tests/layout.test.cjs tests/alignment.test.cjs tests/workspace.test.cjs tests/features.test.cjs tests/extended.test.cjs",
+    "test:e2e": "node --test --test-concurrency=1 tests/e2e.test.cjs tests/layout-e2e.test.cjs tests/alignment-e2e.test.cjs tests/features-e2e.test.cjs tests/workspace-extended-e2e.test.cjs tests/resources-e2e.test.cjs",
     "prepare:compiler": "node scripts/prepare-compiler.cjs",
     "dist:win": "node scripts/build-win.cjs",
     "pack:win": "node scripts/build-win.cjs --dir",
     "test:packaged": "node --test tests/packaged.test.cjs",
     "create:icon": "electron scripts/create-icon.cjs",
-    "test:workspace:dev": "node --test tests/workspace-dev-e2e.test.cjs"
+    "test:workspace:dev": "node --test tests/workspace-dev-e2e.test.cjs",
+    "docs:sync": "node scripts/sync-docs.cjs"
   },
   "devDependencies": {
     "electron": "45.2.1",
@@ -31,7 +32,10 @@
     "pdfjs-dist": "6.5.438",
     "playwright": "1.64.1",
     "typescript": "7.0.2",
-    "vite": "8.3.5"
+    "vite": "8.3.5",
+    "marked": "14.0.0",
+    "dompurify": "3.4.15",
+    "katex": "0.18.10"
   },
   "build": {
     "appId": "org.carbonlang.studio",
@@ -87,6 +91,18 @@
       {
         "from": "THIRD_PARTY_NOTICES.md",
         "to": "THIRD_PARTY_NOTICES.md"
+      },
+      {
+        "from": "node_modules/marked/LICENSE.md",
+        "to": "licenses/marked-LICENSE.txt"
+      },
+      {
+        "from": "node_modules/dompurify/LICENSE",
+        "to": "licenses/dompurify-LICENSE.txt"
+      },
+      {
+        "from": "node_modules/katex/LICENSE",
+        "to": "licenses/katex-LICENSE.txt"
       }
     ],
     "asar": true,
